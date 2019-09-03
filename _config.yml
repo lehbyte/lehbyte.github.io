@@ -1,42 +1,40 @@
 # SITE CONFIGURATION
 baseurl: "/"
-url: "https://sylhare.github.io"
-title: Type on Strap # site's title
-description: "A website with blog posts and pages" # used by search engines
+url: "https://lehbyte.github.io"
+title: Codewalk # site's title
+description: "Step in code." # used by search engines
 
 defaults:
   - 
     scope:
       path: "" # an empty string here means all files in the project
     values:
-      image: assets/img/triangle.png # seo tag
+      image: assets/img/codewalk.png # seo tag
 
 # THEME-SPECIFIC CONFIGURATION
 theme_settings:
   # Meta
-  avatar: assets/img/triangle.png
+  avatar: assets/img/codewalk.png
   color_image: /assets/img/lineart.png # In post when you set color
   favicon: assets/favicon.ico
 
   # Header and footer text
-  header_text: Change header text in <code>_config.yml</code>
-  header_feature_image: assets/img/pexels/triangular.jpeg
-  footer_text: >
-    Powered by <a href="https://jekyllrb.com/">Jekyll</a> with <a href="https://github.com/sylhare/Type-on-Strap">Type on Strap</a>
+  header_text: Walk, a coder's way.
+  header_feature_image: assets/img/pexels/header-bg2.png
 
   # Blog
   excerpt: true # Or "truncate" (first 250 characters), "false" to disable
 
   # Icons
   rss: true  # Make sure you created a feed.xml with feed.xml layout
-  email_address: # Full email address, e.g. "sam@example.com"
+  email_address: alehvee@gmail.com
   behance:
   bitbucket:
   dribbble:
   facebook:
   flickr:
   gitlab:
-  github: "sylhare"
+  github: "lehbyte"
   instagram:
   keybase:
   linkedin:  # Full URL
@@ -47,10 +45,10 @@ theme_settings:
   stack_exchange:  # Full URL
   steam:
   tumblr:
-  twitter: # "twitter username"
+  twitter: "ByteLeh" # "twitter username"
   vimeo:
   wordpress:
-  youtube:
+  youtube: "https://www.youtube.com/channel/UCnXmCLlL9lfrSDdv3XJxcpw"
 
   # Sharing options
   share_buttons:
@@ -59,14 +57,14 @@ theme_settings:
     tumblr:
     pinterest:
     pocket:
-    reddit: true
+    reddit: 
     linkedin:
     wordpress:
     email: true
 
   # Scripts / Features 
   google_analytics: # Tracking ID, e.g. "UA-000000-01"
-  disqus_shortname:
+  disqus_shortname: lehbyte
   katex: true # Enable if using math markup
 
   # Localization strings
@@ -96,13 +94,13 @@ paginate_path: "blog/page:num"
 # AUTHORS
 authors:
   mhagnumdw: # author-id
-    name: MhagnumDw
+    name: Lehbyte
     avatar: "assets/img/avatars/mhagnumdw_avatar.jpg"
     url: 
   sylhare:
-    name: Sylhare
-    avatar: "assets/img/avatars/sylhare_avatar.png"
-    url: "https://github.com/sylhare"
+    name: Lehbyte
+    avatar: "assets/img/avatars/lehbyte.png"
+    url: "https://github.com/lehbyte"
 
 # PORTFOLIO
 collections:

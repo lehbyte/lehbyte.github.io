@@ -1,0 +1,1 @@
+- [ ] Create icon/logo with black footprints on yellow background.
