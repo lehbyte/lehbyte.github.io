@@ -14,7 +14,7 @@ defaults:
 # THEME-SPECIFIC CONFIGURATION
 theme_settings:
   # Meta
-  avatar: assets/img/codewalk.png
+  avatar: assets/img/avatars/lehbyte.png
   color_image: /assets/img/lineart.png # In post when you set color
   favicon: assets/favicon.ico
 

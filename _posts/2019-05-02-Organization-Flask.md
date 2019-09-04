@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Organization - Flask From Scratch, part 2
+title: Organization - Flask From Scratch - [ 2 ]
 feature-img: "assets/img/pexels/python.jpeg"
 thumbnail: "assets/img/pexels/python.jpeg"
 image: "assets/img/pexels/python.jpeg"
@@ -10,7 +10,7 @@ author-id: lehbyte
 
 This is part 2 of building a flask app.  If you haven’t done so I suggest you go take a look at the first tutorial at the bottom. 
 
-## Getting started with part 2
+## Getting started
 
 Navigate to our project and activate the virtual environment;
 ` $ source ../fenv/bin/activate`

@@ -3,6 +3,7 @@ layout: post
 title: Gnome settings won't start.
 color: rebeccapurple
 tags: [Gnome, settings, ubuntu, linux]
+author-id: lehbyte
 ---
 
 I have been having an issue with my settings program not starting.

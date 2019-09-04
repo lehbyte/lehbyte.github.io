@@ -1,14 +1,12 @@
 ---
 layout: post
-title: Setup - Flask From Scratch, part 1
+title: Setup - Flask From Scratch - [ 1 ]
 feature-img: "assets/img/pexels/python.jpeg"
 thumbnail: "assets/img/pexels/python.jpeg"
 image: "assets/img/pexels/python.jpeg"
 tags: [Flask, Scratch, Two, Backend, Organization]
 author-id: lehbyte
 ---
-
-Beginning flask
 
 Flask is one of the best known python micro-frameworks. You can use it to build a simple app and have it up and running in very little time by just writing one python script.
 

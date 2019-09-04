@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Admin - Flask from scratch, part 3
+title: Admin - Flask from scratch - [ 3 ]
 feature-img: "assets/img/pexels/admin.jpeg"
 thumbnail: "assets/img/pexels/admin.jpeg"
 image: "assets/img/pexels/admin.jpeg"
@@ -8,19 +8,13 @@ tags: [Flask, Scratch, Three, Backend, Admin]
 author-id: lehbyte
 ---
 
-## Adding Admin Model Views 
-
 Adding Admin Model Views
-
 Navigate to your app and fire up your virtualenv
 `source ../fenv/bin/activate`
-
 Lets add some authentication and permissions to our app.
-
 We will be using the following extensions;
 
 1. Flask-SQLAlchemy
-
 2. Flask-Admin
 
 Flask-Admin will allow us to restrict some views to administrators only. 

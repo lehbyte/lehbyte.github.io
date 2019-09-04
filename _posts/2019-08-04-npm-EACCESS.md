@@ -1,9 +1,10 @@
 ---
 layout: post
-title: How to fix npm's EACCESS problem for zsh
+title: npm EACCESS solution ( Linux )
 hide_title: false
 feature-img: assets/img/pexels/nodejs.png
 tags: [Nodejs, EACCESS, npm, web, development]
+author-id: lehbyte
 ---
 
 Suppose you want to install an npm package globally  as in npm install -g git-pending but for whatever reason encounter a permissions problem, EACCESS for example. One of the things you could do to fix that is by running the npm command with sudo privileges, as in; `sudo npm install -g git-pending.`

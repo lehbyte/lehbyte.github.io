@@ -20,6 +20,6 @@ I ocassionally write articles about rails apps so if you're a rails programmer I
 
 I hope you can find some use in these articles. Afterall, they are mostly a collection of tips and solutions to problems I continuously encounter in web development. 
 
-Peace out!
+Happy coding!
 
->Lehbyte
+>[Lehbyte](https://twitter.com/lehbyte)

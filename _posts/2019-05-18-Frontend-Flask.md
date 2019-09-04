@@ -1,9 +1,15 @@
 ---
 layout: post
-title: Frontend - Flask From Scratch Part 5
+title: Adding sass to our flask app - [ 5 ]
 tags: [Flask, Scratch, Programming]
 color: brown
+author-id: lehbyte
 ---
+
+Join me as I add some style to my restaurant app. 
+I will be using the `python-sass` package and maybe bootstrap.
+Jquery is also in the mix but I won't be using `gulp`. 
+This is a purely `flask` app.
 
 # Getting our frontend ready
 
@@ -58,7 +64,7 @@ Basically there needs to be an `app/assets/` directory for scss and the `app/sta
 
 `app/__init__.py`
 
-```yml
+```python
 from flask import Flask
 from flask_admin import Admin
 from flask_scss import Scss
@@ -77,7 +83,7 @@ Notice that we removed the SQLALCHEMY configuration line
 `Raj.config["SQLALCHEMY_DATABASE_URI"]='sqlite:////tmp/raj.db'`
 That is because we already define it in our config.py file;
 
-```yml
+```python
 import os
 basedir=os.path.abspath(os.path.dirname(__file__))
 
@@ -98,7 +104,7 @@ WHOOSH_BASE=os.path.join(basedir, 'app.db')
 `/werk.py`
 
 
-```yml
+```python
 #!../../pyenv/bin/python
 from app import Raj
 if __name__ == '__main__':
@@ -116,7 +122,8 @@ Our templates are empty at the moment so lets add some generic structure to them
 
 Here’s our base template;
 
-```yml
+```html
+{% raw %}
 <!DOCTYPE html>
 <head>
     <title>{{ title }}</title>
@@ -147,6 +154,7 @@ Here’s our base template;
         </main>
     </body>
 </html>
+{% endraw %}
 ```
 
 ## Menu

@@ -1,14 +1,12 @@
 ---
 layout: post
-title: Configuration - Flask From Scratch, part 4
+title: Configuring our flask app - [ 4 ]
 feature-img: "assets/img/pexels/header-bg2.png"
 thumbnail: "assets/img/pexels/header-bg2.png"
 image: "assets/img/pexels/header-bg2.png"
 tags: [Flask, Scratch, Four, Backend, Database, Connections]
 author-id: lehbyte
 ---
-
-## Configuration: Flask From Scratch 4
 
 In part 3 we saw how to add admin views to our app but there’s more to be done.
 If I remember correctly, this is how we set up our database
