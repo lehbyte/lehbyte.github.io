@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Flask, Rails, and Django
+title: Flask, Rails, and Django Compared
 feature-img: "assets/img/pexels/codeview.jpeg"
 thumbnail: "assets/img/pexels/codeview.jpeg"
 image: "assets/img/pexels/codeview.jpeg"

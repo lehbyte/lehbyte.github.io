@@ -10,19 +10,42 @@ excerpt_separator: <!--more-->
 If you go to [gulpjs.com](https://gulpjs.com) you will be greeted with the following banner;
 > Automate and enhance your workflow
 
-More precisely, gulp is a frontend build system. Some would call it a;
-> task runner built on Nodejs and npm used for automation of time-consuming and repetitiev tasks involved in web development line minification, concatenation , cache busting, unit testing, linting, optiization, etc. 
+I would like to add just one word in that banner; `frontend` because that is what it does best.
+
+More concisely, gulp is a frontend build system;
+> It is a task runner built on Nodejs and npm used for automation of time-consuming and repetitiev tasks involved in web development line minification, concatenation , cache busting, unit testing, linting, optiization, etc. 
 <!--more-->
-I recently made an express app and wanted to use Gulp, however the latest info I could find on how to integrate gulp in an expressjs app was outdated. It only applied to version 3 of Gulp, the latest was 4.0. 
 
-I tried some hacks that didn't get me far until I gave up and decided to finally headed over to the gulp website for some quick solution and what do I see, code, yes a full page example showing a gulp 4.0 file. I quickly tried some fixes and....
+I recently made an `expressjs` app and was looking for a way to simplify compiling to css, watching my files and serving them so I searched around for a `plugin` that would help me with these tasks. 
 
-Voila! Nothing worked. So I decided that I didn't really understand how gulp worked and decided to read the API. If you don't feel like going through those pages, this article is for you. 
+Now I was little bit familiar with `Grunt` but found it cumbersome and some of it's facilities weird so I looked around for a suitable alternative. 
+I discovered a lot of developers praising `gulpjs` for it's ease of use. 
+Moreover, many were hailing it as a potential replacement of `Grunt`. 
+
+Consequently, I looked up some examples and tried to copy and paste, not because I was a crappy programmer who couldn't be botherd to learn the proper way of using a tool/technology, but because I wanted to gauge `gulpjs`'s ease of use, especially among first users like me. 
+
+Needless to say, I was a litte disappointed. I had expected the problem to be easily fixable because I had brought into the narrative that `gulpjs` was essentially a plug and play plugin.
+But most of the dated comments and `stackoverflow` answers were specific to `gulpjs 3.0`, therein was the problem.
+
+So I did what any responsible programmer would do, I took off my know-it-all hat, and started googling around for information specific to  `gulp 4.0`. 
+However, all I could find about that and about `gulpjs - expressjs` integration  was outdated information. Most tutorials only worked for `gulpjs 3.0` and not `gulp 4.0`. It looked like I was stuck with this problem. 
+
+I tried a couple of hacks which hardly got me anywhere. 
+Finally, I gave up :( and went to `gulpjs.com` for some quick solution, 
+Much to my surprise, the site was sprinkled with snippets of code, I wondered why I hadn't visited the website first. Then I began integrating `gulpjs 4.0` into my `expressjs 4.0` app, 
+
+Unfortunately, nothing worked. So much for those code `snippets`. 
+I had to accept that I really didn't understand how gulp worked.
+This humbled me enought to tackle the API and boy is that documentation all over the place. 
+Anyway, I finally managed to make `Gulpjs` and `Expressjs` work together seamlessly which brings me to the point of this article; 
+
+> If you don't feel like going through those pages, this article is for you. 
+
 ## What is missing?
 
-Here is my gulp file. 
+This was my gulp file. 
 {% highlight js %}
-cont { src, series, paralell, dest, watch } = require("gulp");
+const { src, series, paralell, dest, watch } = require("gulp");
 const sass = require('gulp-sass');
 const plumber = require('gulp-plumber');
 const cleanCSS = require('gulp-clean-css');
@@ -51,25 +74,25 @@ function watchCss(cb){
 }
 {% endhighlight %}
 
-Thats OK.
 Lets take a look at the default task;
 
 ```js
 export.default = parallel(series(transpile, watchCss) bsync);
 ```
 
-Have you figured out what is missing? 
+So what is missing here?  
 
-A server.
+***A `server`. Yep.***
 
-Contrary to what you might think, `browserSync` does not lauch your express app, you have to launch it your self for `browserSync` to proxy it unless you specify an `index.html` (or just `html`) file directory. Otherwise `browserSync` will be stuck in a loop trying to look for `localhost:3000`  to proxy it when the `server` is actually not running.
+Contrary to what you might think, `browserSync` does not lauch your express app, you have to launch it your self for `browserSync` to proxy it or you can specify an `index.html` (or just `html`) file directory otherwise `browserSync` will be stuck in a loop trying to look for a server, `localhost:3000` for example, to proxy when said `server` is actually not running.
 
 ## Nodemon to the rescue
 
-Let’s write a function to launch our server so that we can call it before the browser sync task but first, we have to import the package up top.
-`const nodemon = require('gulp-nodemon');`
+Ok, so let’s write a function to launch our server so that we can call it before the browser sync task.
 
 ```js
+const nodemon = require('gulp-nodemon');
+
 function serve(cb){
     let started = false;
     return nodemon({
@@ -86,7 +109,7 @@ function serve(cb){
 Now let us modify our exports to reflect these changes;
 
 ```js
- parallel( series(transpile, watchCss), serve, bsync );
+ parallel( series(transpile, watchCss, serve), bsync );
 ```
 
-Now we should be able to modify our sass files in realtime.
+Happy coding. 🙂

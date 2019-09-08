@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Admin - Flask from scratch - [ 3 ]
+title: Adding admin views - [ 3 ]
 feature-img: "assets/img/pexels/admin.jpeg"
 thumbnail: "assets/img/pexels/admin.jpeg"
 image: "assets/img/pexels/admin.jpeg"

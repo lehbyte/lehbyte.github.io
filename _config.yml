@@ -2,7 +2,7 @@
 baseurl: "/"
 url: "https://lehbyte.github.io"
 title: Codewalk # site's title
-description: "Step in code." # used by search engines
+description: "Code blog." # used by search engines
 
 defaults:
   - 
@@ -14,13 +14,13 @@ defaults:
 # THEME-SPECIFIC CONFIGURATION
 theme_settings:
   # Meta
-  avatar: assets/img/avatars/lehbyte.png
+  avatar: assets/img/codewalk.png
   color_image: /assets/img/lineart.png # In post when you set color
   favicon: assets/favicon.ico
 
   # Header and footer text
   header_text: Walk, a coder's way.
-  header_feature_image: assets/img/pexels/header-bg2.png
+  header_feature_image: /assets/img/pexels/header-bg2.png
 
   # Blog
   excerpt: true # Or "truncate" (first 250 characters), "false" to disable
@@ -35,7 +35,7 @@ theme_settings:
   flickr:
   gitlab:
   github: "lehbyte"
-  instagram:
+  instagram: "lehbyte"
   keybase:
   linkedin:  # Full URL
   pinterest:
@@ -45,7 +45,7 @@ theme_settings:
   stack_exchange:  # Full URL
   steam:
   tumblr:
-  twitter: "ByteLeh" # "twitter username"
+  twitter: "lehbyte" # "twitter username"
   vimeo:
   wordpress:
   youtube: "https://www.youtube.com/channel/UCnXmCLlL9lfrSDdv3XJxcpw"
@@ -78,7 +78,7 @@ theme_settings:
   str_next_post: "Next post"
   str_previous_post: "Previous post"
   str_next_page: "Next"
-  str_previous_page: "Prev"
+  str_previous_page: "Previous"
   str_javascript_required_disqus: "Please enable JavaScript to view comments."
 
   # Post navigation
@@ -93,13 +93,13 @@ paginate_path: "blog/page:num"
 
 # AUTHORS
 authors:
-  mhagnumdw: # author-id
-    name: Lehbyte
+  sylhare: # author-id
+    name: Sylhare
     avatar: "assets/img/avatars/mhagnumdw_avatar.jpg"
-    url: 
-  sylhare:
+    url: "https://github.com/sylhare"
+  lehbyte:
     name: Lehbyte
-    avatar: "assets/img/avatars/lehbyte.png"
+    avatar: "assets/img/avatars/code.png"
     url: "https://github.com/lehbyte"
 
 # PORTFOLIO

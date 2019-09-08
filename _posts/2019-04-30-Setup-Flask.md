@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Setup - Flask From Scratch - [ 1 ]
+title: Setting up our flask app - [ 1 ]
 feature-img: "assets/img/pexels/python.jpeg"
 thumbnail: "assets/img/pexels/python.jpeg"
 image: "assets/img/pexels/python.jpeg"

@@ -1,9 +1,9 @@
 ---
 layout: post
-title: Organization - Flask From Scratch - [ 2 ]
-feature-img: "assets/img/pexels/python.jpeg"
-thumbnail: "assets/img/pexels/python.jpeg"
-image: "assets/img/pexels/python.jpeg"
+title: Organizing our flask app - [ 2 ]
+feature-img: "assets/img/pexels/organizing.jpeg"
+thumbnail: "assets/img/pexels/organizing.jpeg"
+image: "assets/img/pexels/organizing.jpeg"
 tags: [Flask, Scratch, Two, Backend, Organization]
 author-id: lehbyte
 ---
