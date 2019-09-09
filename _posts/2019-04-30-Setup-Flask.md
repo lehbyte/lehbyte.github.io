@@ -8,84 +8,203 @@ tags: [Flask, Scratch, Two, Backend, Organization]
 author-id: lehbyte
 ---
 
-Flask is one of the best known python micro-frameworks. You can use it to build a simple app and have it up and running in very little time by just writing one python script.
+`Flask` is one of the best known python micro-frameworks. 
+It is easy to use, light weight, and fast. <br/>
+Today we are going to use it to build what will eventually become a restaurant app. 
 
-It’s flexible nature makes learning and building web applications fun.
-And if you are rusty on your knowledge of python then there’s nothing to fear.
-Flask is simple enough for even a beginner to pick up.
+Building a restaurant app is not as easy as it sounds. <br/>
+Think of all the things you have to do before ordering food from an online menu;
 
-This tutorial is for you if you have never built a flask app before or you’ve built one but still don’t understand how flask works.
+- Look at different menu items
+- Look at prices for those items
+- Choose between carrWet or delivery
+- Begin a checkout process
+- Enter billing information
+- Get estimate of when meal will be ready
 
-We will build a flask app together  from scratch.
-You will learn about flask basic functions runs as we tweak and shape our app into something better.
-After this tutorial, you should be able to build and launch your own flask application without issues.
+That may be a long list but it's ideally the type of process the user expectes and is probably accustomed to. These use cases are our requirements. 
+Let's translate them into design. 
 
-Ideally, the end goal is to help you acquire knowledge that will allow you to spend more time building your flask app and less time looking through books or googling for things. Lets begin.
-Setup your system
+Ideally, the user should enjoy browsing different menu items; <br/>
+Prices should be prominently displayed, the option to chose between carrWet or delivery should become available once the user has added a menu item onto their food tray.
 
-There are a number of things you need to have before you can begin this tutorial.
-For starters you will need to be on a Linux-based system or something similar.
-Not Windows. Okay you can also follow along if you have Windows, the difference is that you will need to navigate to Scripts to activate your virtual environment.
-You will obviously have to install python and pip on your Windows system if both are not installed. Everything else is similar.
+The checkout process should be secure and the user should receive updates about their meal. 
 
-For this tutorial I’m going to be using Ubuntu. If you are not on a Linux-based system, I  suggest using a Linux-based virtual machine or container otherwise you’re going to end up having issues in subsequent tutorials. For this tutorial it’s okay.
+Essentially, we want our app to;
+- Look good (and feel good)
+- Be `responsive`
+- Fairly fast
+- Most importantly, be `secure`
 
-If you are on a Linux-based operating system, then Make sure you have the following installed;
+## Design
 
-    Python (I am using 2.7)
-    Virtualenv
-    vim (Optional)
+Lets break down our app into two different design groups;
 
-Python usually ships with Ubuntu.
-You can check if you have python by typing $ python --version.
+1. **Frontend**
+2. **Backend**
 
-If there’s python on your system then that command will return the version of python that’s available on your system. In my case I have python 2.7.16 you might have a different version of python. If you do, make sure that its above 2.7
+### Frontend design
 
-If you don’t have python installed on your system  then execute the following command;$ sudo apt-get install python
-If you have Windows, then just go to the python website to download the latest python installer installer or the one corresponding to 2.7.16
+Frontend design is going to be defined by a grid layout where various menu items will be displayed. 
+It will also have; a search bar, and varoius search options for the user which will be  prominently placed at the middle top of the page;
 
-You can also check and  install pip similarly in case it is not installed. For Windows users you can run the pip installer executable to install pip on your system.
-You might also need to edit your system path to include both python and pip.
+The grid layout will contain a wrapper for all the menu items available for order. <br/>
+It is important that menu items display the total time it would take to prepare a food item.<br/>
+(*We shall see what comprises of a food menu item or food item somewhere down this page*).<br/>
+When the user begins a checkout process for their food items, count down timers for each of the food items will start and the total time remaining until the food items are ready will be displayed to the user.
 
-## Getting started
-Now that you have python and pip installed create a folder for your app;
+So we will need;
+1. **React**
+2. **Bootstrap** or **Foundation** or **Sass**
+3. **JavaScript**
+
+
+### Backend design
+
+We have to consider how the checkout process will playout and what technologies will help us scale properly especially for heavy loads.
+
+There are a number of questions that we have to consider;
+>1. How are we going to ensure or enforce security. <br/>
+*We want guest users to browse and checkout without having to register for an account.*
+2. Where do we store the user's credentials when they sign up for an account?
+3. How menu items will be added and deleted from the app itself.
+
+#### 1. How we are going to ensure or enforce security. 
+There are a number of ways we can go about this;
+1. *We can create a guest user account for the user until they checkout, create an account or exit*
+2. *We can bolster security by using 3rd party authentication services for that guest user*
+3. *Or we can force the user to sign up for the accounr.* - ***Not good*.**
+
+#### 2. Where do we store the user's credentials when they sign up for an account?
+1. Local app database
+2. Cloud database, like **S3** or **wasabi**
+3. Use a 3rd part extension to handle **autnentication**.
+
+Using 3rd part extensions relieves us of some problems but it doesn't necessarily relieve us of responsibility. If that third-party extension or plugin fails, we will responsible for any damages incurred to the user. 
+
+We have to choose third-party extensions wisely. 
+**Do not** sacrifice price for function and - importantly - security. 
+If we feel confident enough to build it then we should do so. 
+
+Our final list of bakend tools is as follows;
+1. *PostgresQL database + Amazon storage, S3 for images and user credentials*
+2. *Foundation + Sass + Javascript with some python for interface to backend*
+
+---
+
+#### 3. How menu items will be added and deleted from the app itself.
+
+This is something that is going to be done many times over and it makes no sense to do it programatically. So a secure interface to the backend has to be created to allow the restaurant owners to add and remove images and to modify properties for each menu item as they see fit. 
+Some of these properties include;
+
+- *Food item preparation time*
+- *Food item image*
+- *Food item name and description*
+
+I have described the properties of an object and that is what a food item is, an object.<br/>
+Now we shall be mapping many of these objects to a database. 
+To do that we shall need an `ORM`. That is, an `Object Relational Mapper`.
+Luckily for us there's `SQLALchemy`. 
+
+Since we decided to store user credentials, we would have to sanitize them before storing them in the database, this often includes `salting` or `encrypting` them in some way. <br/>
+The `bcrypt` package comes to mind while thinking of this but it's too early to get into details. <br/>
+Ultimately, I think an external `package` that does this sort of thing - and does it well - would be our best option for handling`authentication`. <br/>
+However, most `packages` or `extenstions` that provide `authentication` serices are usually too expensive for a simple hobby app like ours so we will implement `authentication`. 
+It's also fun to learn how to do it, correctly. 
+
+#### Migrations
+
+Migrations become important when the `schema` of our `database` changes and we have to update every record in our database without destroying it. Usually when the schema changes, data gets lost. Migrations allow We to retain We data by making non-desctructive changes to the database. 
+
+So now we have the backend tools and a fairly decent mental picture of what we need to do;
+- **Secure checkout process**
+- **Implement guest user that can checkout menu items**
+- **Backend inteerface for addign and modifying existing items**
+
+--- 
+
+### Going back to the frontend
+
+Let us revist that food menu item one more time;
+- Image + image dimensions
+- *Title/name*
+- *Descrition*
+- Date added
+- *Preperation time*
+- Price
+
+Now our food menu item is complete! All that's left is to define a model with these attributes for `SQLAlchemy` to map to our database.
+`SQLAlchemy` abstracts away some of the footwork we would traditionally have to do via SQL queries to accomplish the same goals. 
+
+### Things to keep in mind
+
+1. **Responsiveness**; The grid laWet has to accomodate mobile viewports in an elegant way
+2. Elegant design (frontend and backend). This usually goes without saying.
+
+<br/>
+--------
+
+
+## Show Me The `Code`!
+We have talked a lot about what the web app will look like on the `frontend` and the `backend`. 
+Now we shall start setting up our app in a way that will allow us to build on what is at the foundation. 
+
+
+## Before you begin
+
+I’m going to be using Ubuntu. If We are not on a Linux-based system, I  suggest using a Linux-based virtual machine or container otherwise We’re going to end up having issues in subsequent tutorials. For this tutorial it’s okay.
+
+If We are on a Linux-based operating system, then Make sure We have the following installed;
+
+- `Python` (I am using 2.7)
+- `virtualenv`
+- `vim/vscode` (This is Optional)
+
+Install `python` if We do not have it;
+`$ sudo apt-get install python`
+
+If We have Windows, then just go to the python website to download the latest python installer installer or the one corresponding to 2.7.16
+
+We can also check and  install `pip` similarly in case it is not installed. 
+For Windows users We can run the `pip installer executable` to install `pip` on our system.
+We might also need to edit our system path to include both `python` and `pip`.
+
+### Getting started
+
+Now that we have `python` and `pip` installed, we shall create a folder for the `app`;
 ```bash
 $ cd ~/Documents
 $ mkdir myapp
 $ cd myapp
 ```
-
-myapp is where your app is going to reside.
-
-Now create and activate a virtual environment for your app
+We can call it anything We want, I just ran out of ideas so I stuck with `myapp`.
 
 ```bash
 $ virtualenv myenv
 $ source myenv/bin/activate
 ```
-The first command will install your virtual environment inside your application folder. python, pip are some of the things that will be installed in your virtual environment.
+The first command will install our virtual environment inside our application folder. Sometimes, this is important. `Python` and `pip` are some of the things that will be installed in the virtual environment.
 
-That second command will activate your virtual environment. Your console will look something like this;
+That second command will activate our virtual environment. our console will look something like this;
 
 `$ (myenv) `
 
-Now when you type python your virtual environment will invoke the python that’s native to that virtual environment not your system.
-Once your virtual environment is activated, install the flask package by running this;
+Once our virtual environment is activated, we shall install the `flask` package by running this;
 
 `$ (myenv) pip install flask`
 
-This will allow us  to create our flask application.
-You can also specify the type of server you want your application to run on
-$ export FLASK_ENV=development If you don’t specify this, you app will run on a production server.
+This will allow us  to create our `flask` application.
+We can also specify the type of server We want our application to run on
+`$ export FLASK_ENV=development`, and the name of the app;
+`$ export FLASK_APP=myapp`
 
-## On to the application
+### Setting up the app
 
-Now that we have the basic setup in place, lets try to create a simple flask app.
-Create and edit a simple python script using an editor of  your choice (I’m using `vim`);
+We can just have everything inside one script by creating it;
 
 `$ (myenv) vi app.py`
 
-Add the following code to it;
+And adding the following code to it;
 
 ```python
 1. #!myenv/bin/python
@@ -100,20 +219,18 @@ Add the following code to it;
 10. app.run("127.0.0.1")
 ```
 
-Then make the script accessible and executable by running the following command:
+We can then make the script accessible and executable by running the following command:
 `$ chmod a+x app.py`
-Now run it; `$ ./app.py`
-Navigate to `127.0.0.1:5000` or `localhost:5000` in your browser.
-If you see a page displaying the words Welcome to my flask application congratulations.
+And run it; `$ ./app.py`
+Navigate to `127.0.0.1:5000` or `localhost:5000` in our browser.
+We should expect to see a page displaying the words Welcome to my flask application congratulations.
 
-## How is this working?
+I will now describe what each line of code in our `app.py` script does before breaking things up.
+The lines are; `1, 2, 4, 6, 7, 10`
 
-I will now describe what each line of code in our `app.py` script does.
-That is lines; `1, 2, 4, 6, 7, 10`
+### Line 1. #!myenv/bin/python
 
-## Line 1. #!myenv/bin/python
-
-The first line tells bash to execute your script using the instance of python installed in your virtual environment. You can use one virtual environment for multiple flask apps so it’s not necessary and is quite wasteful to have a virtual environment for every flask app you have (in my opinion).  So if you want to build two  or more flask applications using one virtual machine then it would have to reside one level above those flask applications.
+The first line tells bash to execute our script using the instance of python installed in our virtual environment. We can use one virtual environment for multiple flask apps so it’s not necessary and is quite wasteful to have a virtual environment for every flask app We have (in my opinion).  So if We want to build two  or more flask applications using one virtual machine then it would have to reside one level above those flask applications.
 
 For example;
 
@@ -127,26 +244,26 @@ For example;
 -------- app.py
 ```
 
-You can then specify on the first line of each app.py script above:
+We can then specify on the first line of each app.py script above:
 
 ```bash
-#!../fenv/bin/python
+#!myenv/bin/python
 $ cd ../
 ```
 
 then create a new virtual environment,
 `$ virtualenv fenv`
-then quickly go back to your flask app, activate it and install flask;
+then quickly go back to our flask app, activate it and install flask;
 
 ```bash
-$ source ../fenv/bin/activate
+$ source ./myenv/bin/activate
 $ (fenv) pip install flask
 ```
-Don’t forget to change line 1 of your script so that it says;
-`#!../fenv/bin/python`
+Don’t forget to change line 1 of our script so that it says;
+`#!myenv/bin/python`
 
 
-## Line 2. from flask import Flask
+### Line 2. from flask import Flask
 
 Line 2 in our app.py  imports a Flask object from the flask module.
 flask and Flask are two separate things.
@@ -154,20 +271,20 @@ flask as I’ve said is a module.
 
 Flask is an **object** that implements a **WSGI** application and acts as the central object. It accepts the name of the module or  the package of the application. Once it is created it will act as a central registry for the view functions, the URL rules, template configuration and so on.
 
-I wont get into what a **WSGI** application is, you can read more about that on Wikipedia if you want but I will say that Flask is based on `Jinja2` and `Werkzeug` which is a comprehensive library of tools for **WSGI** applications.
+I wont get into what a **WSGI** application is, We can read more about that on Wikipedia if We want but I will say that Flask is based on `Jinja2` and `Werkzeug` which is a comprehensive library of tools for **WSGI** applications.
 
 
-## Line 4. app = Flask(__name__)
+### Line 4. Raj = Flask(__name__)
 
 The `Flask` object is what we use to create our app on `line 4`.
 
-`4. app = Flask(__name__)`
+`4. Raj = Flask(__name__)`
 
-The __name__ that you see refers to the name of the module, in this case flask.
-You can also call your app anything, calling it app just makes things easier but you can do this;
+The __name__ that We see refers to the name of the module, in this case flask.
+We can also call our app anything, calling it app just makes things easier but We can do this;
 
 ```python
-1. #!../fenv/bin/python
+1. #!myenv/bin/python
 2. from flask import Flask
 3. 
 4. Raj = Flask(__name__)
@@ -181,9 +298,9 @@ You can also call your app anything, calling it app just makes things easier but
 
 Go ahead and try it out. `$ (fenv) ./app.py`
 
-## Line 6. @app.route("/") or @Raj.route("/")
+### Line 6. @app.route("/") or @Raj.route("/")
 
-Line 6 is what is known as a decorator. A decorator is essential a method that is able to “alter” the way a function behaves without having to change the source code of the function.  If you already know what a decorator does then you can skip the code but here’s a brief example.
+Line 6 is what is known as a decorator. A decorator is essential a method that is able to “alter” the way a function behaves without having to change the source code of the function.  If We already know what a decorator does then We can skip the code but here’s a brief example.
 
 ```python
 >>> def D(func): # a decorator for A function 
@@ -208,7 +325,7 @@ In addition to the URL rule, we can also specify options such as;
 
 We didn’t have to specify that method because it’s the default method.
 
-## Line 7. def index(): or page_one(): 
+### Line 7. def index(): or page_one(): 
 This is just a view function which returns the string "Welcome to Raj's flask application." It’s registered to the URL rule we specify in our app’s route decorator. We can also pass objects and strings to this function for example
 
 ```python
@@ -220,9 +337,9 @@ def page_one(some_object):
     print some_object.get_message()
 ```
 
-And so on. Of course you would have to define global_string and some_object
+And so on. Of course We would have to define global_string and some_object
 
-## Line 10. app.run("127.0.0.1") or Raj.run("127.0.0.1")
+### Line 10. app.run("127.0.0.1") or Raj.run("127.0.0.1")
 
 Raj.run("127.0.0.1") essentially runs our flask application on a local development server at the localhost which is an alias the ip address 127.0.0.1
 
@@ -231,22 +348,24 @@ So to run our app on a different port with debugging enabled we would have to sp
 
 `Raj.run("localhost", port=8000, debug=True)`
 
-The production environment is what runs by default. You would have to specify your option in a `FLASK_ENV` variable.
+The production environment is what runs by default. We would have to specify our option in a `FLASK_ENV` variable.
 
-To specify a development environment for your application run;
+To specify a development environment for our application run;
 `$ export FLASK_ENV=development`
 
-Then you can either do;
+Then we can either do;
 ```python
 $ flask run or
 $ ./run.py
 ```
+<br/>
 
+------
 
-## Final flask application code.
+### Full code listing.
 
 ```python
-#!../fenv/bin/python
+#!myenv/bin/python
 from flask import Flask
 
 Raj = Flask(__name__)
@@ -258,5 +377,95 @@ def index():
 Raj.run("localhost", port=8000, debug=True)
 ```
 
-In the next tutorial I will talk about organization as we add more things onto our flask app.
-I hope you found this tutorial helpful.  Happy coding 🙂 .
+
+## Breaking things up
+
+All that is well and good but it's gonna make it very cumbersome for us to develop our app because seperating business logic from app logic will become increasingly harder during development. So we will have to seperate our `views` from our `models` and `controllers`. We've got not `models` - yet but we will be following the `M-V-C` architectural pattern.
+
+Right now we shouldn't be worried because we have one view;
+
+```python
+@Raj.route("/", methods=["GET"])
+def index():
+    return ("Welcome to Raj's flask application.")
+```
+
+So lets break up in accordance with the `M-V-C` pattern. 
+Ideally we will want the structure of our app to be thus;
+
+```bash
+├── app
+│   ├── __init__.py
+│   ├── __init__.pyc
+│   ├── static
+│   │   └── style.css
+│   ├── templates
+│   │   └── index.html
+│   ├── views.py
+│   └── views.pyc
+└── run.py
+```
+------
+
+<br />
+
+### `app/`
+This is the folder that will house everything about our app. 
+It contains;
+- An initialization script `__init__.py`
+- A `static/` directory for our `CSS`
+- A `templates/` directory for our `HTML` templates.
+- `views.py` 
+
+### `__init__.py`
+In python the `__init__` keyword is what represents a constructor and in this case represents our `app` if you think of it as a package. 
+In fact, the first step to making a python package is to have a script defined that way.
+Here are the contents of our `__init__.py` file;
+
+```python
+from flask import Flask
+Raj = Flask(__name__) 
+from app import views
+```
+
+### `static/`
+The `static/` directory houses all our `css` stylesheets. 
+Right now we've got no stylesheet but that will change in the second tutorial. 
+
+### `templates/`
+The `templates/` directory houses our `html` files, but they are considered templates because we can pass `python` objects to them. 
+
+### `views.py`
+`views.py` file contains all our views, in this case;
+```python
+@Raj.route("/", methods=["GET"])
+@Raj.route("/index", methods=["GET"])
+def index():
+    return ("Welcome to Raj's flask application.")
+```
+
+### `run.py`
+Finally, our `run.py` script is what will allow us to run our app. 
+```python
+#!myenv/bin/python
+from app import Raj
+Raj.run("localhost", port=3000, debug=True)
+```
+This compartmentalized form of our app allows us to work on our app efficiently.
+
+## Conclusion to part 1
+We have barely started. There's still a lot more work to do on the `frontend` and the `backend`
+but at least we have created a foundation from which to actually begin working on the `frontend`
+
+We will start with the `frontend` until we have met all the goals on that front :). 
+
+Some developers prefer starting with the `backend` and work their way towards the `front` but in my opinion it makes it easier to learn when we start from the `frontend` because it's the least `problematic` fronts to deal with. It is really a matter of taste and perhaps project complexity, for example simple `backend` vs simple `frontend`. 
+
+It actually might make more sense for us to lay down some basic database connections and admin views so that we have `items` to add and delete. The model doesn't have to be complicated.
+This is actually the easy part of `backend` work, at least as far as the basics go. 
+It's a good place to start in the next part of this series.
+
+In addition to the database connections and an `admin` interface to that database we shall also create the basic layout of our restaurant;
+
+>- `css` stylesheets + `sass` plugin
+- `HTML` templates complete with sample images

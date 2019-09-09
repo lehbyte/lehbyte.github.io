@@ -8,12 +8,15 @@ tags: [Flask, Scratch, Two, Backend, Organization]
 author-id: lehbyte
 ---
 
-This is part 2 of building a flask app.  If you haven’t done so I suggest you go take a look at the first tutorial at the bottom. 
+This is part 2 of building a restaurant app in flask. 
+We made a basic flask app in the first part of this seris. We will now focus
+on organizing different parts of the app. This organization is important because it helps 
+us seperate business logic from app logic. 
 
 ## Getting started
 
-Navigate to our project and activate the virtual environment;
-` $ source ../fenv/bin/activate`
+Navigate to our project and activate our virtual environment;
+`$ source ../fenv/bin/activate` 
 
 If you remember we wrote our flask app in one script. That code looked like this;
 **app.py**

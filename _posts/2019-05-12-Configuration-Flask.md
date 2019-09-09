@@ -8,8 +8,10 @@ tags: [Flask, Scratch, Four, Backend, Database, Connections]
 author-id: lehbyte
 ---
 
-In part 3 we saw how to add admin views to our app but there’s more to be done.
-If I remember correctly, this is how we set up our database
+In part 3 we saw how to add admin views to our app.
+The way our database is setup might lead to some issues when adding and deleting records. 
+Sometimes the database might drop data when the virttualenv is reactivated. 
+So we have to change the way we configure our databse.
 
 `Raj.config["SQLALCHEMY_DATABASE_URI"]='sqlite:////tmp/raj.db'`
 
