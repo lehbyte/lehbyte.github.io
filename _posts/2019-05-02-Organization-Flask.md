@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Organizing our flask app - [ 2 ]
+title: Databases and Flask Extensions - [ 2 ]
 feature-img: "assets/img/pexels/organizing.jpeg"
 thumbnail: "assets/img/pexels/organizing.jpeg"
 image: "assets/img/pexels/organizing.jpeg"
@@ -8,245 +8,611 @@ tags: [Flask, Scratch, Two, Backend, Organization]
 author-id: lehbyte
 ---
 
-This is part 2 of building a restaurant app in flask. 
-We made a basic flask app in the first part of this seris. We will now focus
-on organizing different parts of the app. This organization is important because it helps 
-us seperate business logic from app logic. 
+This is part 2 of building a restaurant app in flask. <br />
+We made a basic flask app in the first part of this series. We will now focus
+on organizing different parts of the app. 
 
-## Getting started
+As stated before we shall begin with some backend stuff, like an `admin` interface and some `database` setups before diving into other parts of our app. 
+
+However, the primary goal of this second part is to `setup` our app's frontend. <br />
+To that end we shall see how to use organize thr app to use the `flask-scss` extension, and how to simplify development with other tools, and so on.
+
+# Getting started
 
 Navigate to our project and activate our virtual environment;
-`$ source ../fenv/bin/activate` 
+`$ source ../myenv/bin/activate` 
 
-If you remember we wrote our flask app in one script. That code looked like this;
-**app.py**
+## Style Up
+Before we take a look at our `__init__.py` file, let us first install the `flask-scss` extension and `flask-admin`;
 
-```python
-#!../fenv/bin/python
-from flask import Flask
+1. `$(myenv) pip install flask-sscss`
+2. `$(myenv) pip install flask-admin`
 
-Raj = Flask(__name__)
-
-@Raj.route("/", methods=["GET"])
-def index():
-    return ("Welcome to Raj's flask application.")
-
-Raj.run("localhost", port=8000, debug=True)
-```
-
-Lets try to separate things here.
-
-First off lets put our view in it’s own file which we will build on later on. We shall name it views.py
-
-This is what views.py should look like;
-
-```python
-@Raj.route("/", methods=["GET"])
-@Raj.route("/index", methods=["GET"])
-def index():
-    return ("Welcome to Raj's flask application.")
-```
-
-Lets create a folder for views.py  it’s also where we will put our application `templates` and `static` files.
-
-
-```python
-$ (fenv) mkdir app
-$ (fenv) mv views.py app/
-```
-
-Since we’ve moved our views into another folder, we have to import so that we can route requests;
-**views.py;**
-
-```python
-from app import Raj
-@Raj.route("/", methods=["GET"])
-@Raj.route("/index", methods=["GET"])
-def index():
-    return ("Welcome to Raj's fl
-```
-
-So now our `app.py` should look like so;
-
-```python
-#!../fenv/bin/python
-from flask import Flask
-Raj = Flask(__name__) 
-Raj.run("localhost", port=8000, debug=True)
-```
-
-## Entry point
-Lets create an entry point for our app by creating `app/​__init__.py`
-`$ (fenv) vi app/__init__.py`
-Cut the following code and add it to `app/​__init__.py`
-
-```python
-from flask import Flask
-Raj = Flask(__name__)
-from app import views
-```
-
-Now our original `app.py` looks like so;
-
-```python
-#!../fenv/bin/python
-Raj.run("localhost", port=8000, debug=True)
-```
-
-And our directory structure is thus;
+Now lets navigate to our app folder: 
 
 ```bash
-fenv/
-myapp/
-----app/
---------__init__.py
---------views.py
-----app.py
-----tenv/
+├── app
+│   ├── __init__.py
+│   ├── __init__.pyc
+│   ├── static
+│   │   └── style.css
+│   ├── templates
+│   │   └── index.html
+│   ├── views.py
+│   └── views.pyc
+└── run.py
 ```
 
-## Further breakdown
-Now all app.py is doing is just running our app – Raj.
-But in order to run the app it has to know where the app is so specify it (`app.py`);
+And create two new folders;
 
-```python
-#!../fenv/bin/python
-from app import Raj
-Raj.run("localhost", port=8000, debug=True)
-```
+1. `app/assets/scss` 
+2. `app/static/css`
 
-Since all  **app.py** does now is run our application, it’s better to rename it to something like; 
+`app/assets/scss` will house our main `.scss` files where as `app/static/css` will contain our 
+compiled css.
 
-`$ (fenv) mv app.py run.py`
-
-You can also get rid of `tenv/` if you’re not using it; $ (fenv) rm -rf tenv
-And our directory structure looks like this;
-
-```bash
-fenv/
-myapp/
-----app/
---------__init__.py
---------views.py
-----run.py
-----tenv/
-```
-
-## Recap
-
-Your `app/__init__.py`
+Ok so now lets setup `flask-scss` in our `__init__.py` file:
 
 ```python
 from flask import Flask
-Raj = Flask(__name__)
+from flask_scss import Scss
+from flask_admin import Admin
+
+raj = Flask(__name__)
+
+Scss(raj, asset_dir='app/assets/scss', static_dir='app/static/css')
+admin = Admin(raj)
+
 from app import views
 
 ```
 
-Your `​app/views.py`
-```python
-from app import Raj
-@Raj.route("/", methods=["GET"])
-@Raj.route("/index", methods=["GET"])
-def index():
-    return ("Welcome to Raj's flask application")
+Notice that we initialized our `Admin` object with our `flask` app. <br />
+We are not done just yet. We have to call the `add_views` function of that `admin` object. 
+The views function should take in an object that defines it's attributes in terms of `SQL` rows and columns. More on that later.
 
-```
-
-And your `run.py`
-
-```python
-#!../fenv/bin/python
-from app import Raj
-    if __name__=='__main__':
-Raj.run("localhost", port=8000, debug=True)
-```
-Go a head and run the app to make sure that it still runs as expected.
-
-## Jinja2 templates
-
-Currently our view is just a string rendered as HTML.
-To add HTML files to our app we have to create a directory called `templates` just for HTML files
-If we want to also include `css stylesheets` and `JavaScript` files we would also create another asset `static` that would contain these files.
-
-```bash
-$ (fenv) mkdir app/templates
-$ (fenv) mkdir app/static
-```
-
-Go a head and create a new `HTML`file in the templates folder named `index.html`. It can contain anything, just make sure it’s an HTML file. Here is an example;
+Now we can't add `css` to our site if we don't have the `html` so lets create an `index.html` file in our templates folder.
 
 ```html
 {% raw %}
-<!DOCTYPE>
+<!DOCTYPE html>
 <html>
 <head>
-    <title>{{ title }}</title>
-<link
-    rek="stylesheet"
-    type="text/css"
-    href="{{url_for('static', filename='style.css')}}"
-/>
+	<meta charset="UTF-8">
+	<meta name="description" content="Raj's Restaurant">
+	<meta name="keywords" content="HTML, CSS, JavaScript">
+	<meta name="author" content="Lehbyte">
+	<meta name="application-name" content="Raj's Application">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>{{ title }}</title>
+	<link rel="stylesheet" type="text/css" href="./static/css/main.css" />	
 </head>
-
+<!-- body -->
 <body>
-    <h1>Welcome to my page</h1>
-    <p>Add text here</p>
+	<main>
+		<div class="container">
+			<div class="navigation">
+				<ul>					
+					<li><a href="#">Home</a></li>
+					<li><a href="#">About</a></li>
+					<li><a href="#">Menu</a></li>
+					<li><a href="#">Coupons</a></li>
+					<li><a href="#">Support</a></li>
+				</ul>
+			</div>
+			<h1>Welcome to Raj's Restaurant!</h1>
+			<div class="wrapper" >
+				<input class="search" type="text" id="search" />
+				<input class="submit" type="submit" value="Submit" />
+			</div>
+			<div class="food-grid">
+				<div class="food-item">1</div>
+				<div class="food-item">2</div>
+				<div class="food-item">3</div>
+				<div class="food-item">4</div>				
+				<div class="food-item">5</div>	
+				<div class="food-item">6</div>	
+			</div>
+		</div>
+	</main>
 </body>
+<!--body -->
 </html>
 {% endraw %}
 ```
 
-## Passing python variables to your `HTML` document
-`{% raw %}{{ title }}{% endraw %}` is an embedded python variable that we will be converted to `HTML` by the `Jinja2` template engine.
-We shall pass this variable as a parameter to the `render_template` function.
+We also need to modify our `views.py` to render the html file above inder the default route. 
 
+```python
+from flask import render_template, url_for
+from app import raj
 
-##  Including `css` files in your `HTML` files
+@raj.route('/')
+@raj.route('/index')
+def index():
+	return render_template('index.html', title="Raj's Restaurant")
+```
+
+Rember that when linking `stylesheets` and `scripts`, searching begins at the root directory of the 
+app, `raj` in our case. And we need to ensure that we are trying to access a file that actually exists; 
 ```html
 {% raw %}
-<link href=”{{url_for(‘static’, filename=’style.css’)}}” />
+<link rel="stylesheet" type="text/css" href="./static/css/main.css" />	
 {% endraw %}
 ```
 
-**url_for** is a flask function that helps us locate static resources. Your would have to include in in `app/views.py`
-You have to make sure that there is a `style.css` file in your `static` folder. It could contain some as simple as;
-`body{background-color:orange;}
-You can also add `JavaScript` files/libraries similarly.
+## CSS Sprinkles
+Lets create some `CSS` rules to make our app look better.
+This is what our site is going to look like;
+![Raj](/assets/img/pexels/screenshot.png)
 
-just below `from app import Raj` add the following;
+I created three `partials`;
 
-`from flask import url_for`
+1. `_menugrid.scss`
+2. `_navigation.scss`
+3. `_variables.scss`
 
-Now to render our HTML  file we will need to import the `render_template` function from flask;
-Modify the previous line so that it says; 
+And a `main.scss` that includes all three `partials`. 
+It's easy to see what each `partial` is made for. Lets go through them one by one.
 
-`from flask import url_for, render_template`
+## `_menugrid.scss`
 
-Now edit our `index()` in `views.py`;
-
-```python
-def():
-    return render_template("index.html", title="Raj's application")
+```css
+.food-grid{
+    display: grid;
+    grid-gap: 5px;
+    grid-template-rows: 400px 400px;
+    grid-template-columns: 33% 33% 33%;
+    height: inherit;    
+    background-color: skyblue;
+}
+.food-item{
+    padding: 2px;
+    margin: 2px;    
+    background-color: rebeccapurple;
+}
 ```
 
-Save the file and run your app.
-It should now display the HTML file you included/created in the `app/templates` folder.
+We have opted to use a grid system to display food items. The `.food-item` will contain a picture as well as some description of the food an an add to tray option for the user to add the item to their tray so that they can check out it out later on. 
 
-## Updated app directory
-```python
-/fenv
-/myapp
-----app/
---------__init__.py
---------views.py
---------static/
-------------style.css
---------templates
-------------index.html
-----run.py
-----tenv
+## `_navigation.scss`
+```css
+a{
+    color: $link-color;
+    text-decoration: none;
+    cursor: pointer;
+}
+a:hover{
+    border-bottom: 1px solid $outline;    
+}
+a:link, a:visited{
+    color: $link-visited;    
+}
+a:link:active, a:visited:active{
+    color: $link-active;
+}
+
+.navigation{
+    text-align: center;
+    font-size: 1.2em;
+    font-variant-caps: all-petite-caps;    
+}
+
+ul{    
+    list-style-type: none;
+    display: inline-flex;
+    
+}
+
+@media only screen and (max-width: 432px){
+    ul{        
+        list-style: none;   
+        li{
+            margin: 3px;
+            padding: 3px;
+            border: 2px solid black;
+        }
+        &:hover{
+            background-color: black;
+        }
+    }
+}
 ```
 
-That’s it for now. In the next part, I will talk about using `flask` extensions and how to use `blueprints`.
-Until then; Happy coding 🙂 .
+## `_variables.scss`
+
+```css
+$link-color: darkgreen;
+$link-visited: black;
+$link-active: seagreen;
+
+$bg-color: snow;
+$outline: gray;
+
+$search-height: 50px;
+$sradius: 25px;
+```
+
+## `main.scss`
+
+Finally, here is our `main.scss`
+
+```css
+@import url('https://fonts.googleapis.com/css?family=Josefin+Sans&display=swap');
+*{
+    margin: 5px;
+    padding: 5px;
+    box-sizing: border-box;
+}
+html{ font-family: 'Josefin Sans', sans-serif; }
+html, body{
+    width: 100%;
+    height: 100%;
+    margin: 0;    
+}
+
+@import 'variables';
+@import 'navigation';
+
+h1{
+    font-size: 48px;
+    text-align: center;
+    padding-bottom: 25px;
+    // text-decoration: underline;
+}
+
+
+
+body{
+    display: flex;
+    flex-direction: column;    
+    // background-color:$bg-color;
+    // background-color: blanchedalmond;    
+    background: -webkit-linear-gradient(to bottom, white 20%,burlywood 80%);
+    background: linear-gradient(to bottom, white 20%, burlywood 80%); 
+    background-attachment: fixed;
+
+}
+
+.wrapper{    
+    width: 100%;
+    background-color: darken(skyblue,10%);
+    text-align: center;
+    position: relative;
+    height: 60px;
+    font-size: 0;    
+    // border-radius: 50px;    
+}
+input{    
+    font-size: 13px;
+    vertical-align: middle;
+    padding: 0px;
+    margin:0px;
+}
+.search{
+    padding: 0 30px;
+    font-size: 20px;
+    width: 40%;
+    max-width: 400px;
+    height: $search-height;
+    border: 1px solid darken(white, 30%);
+    border-radius: $sradius 0 0 $sradius;
+}
+.submit{
+    font-size: 20px;
+    color: white;
+    cursor: pointer;
+    border: none;
+    background-color: black;
+    background-size: 34px 34px;
+    border-radius: 0 $sradius $sradius 0;
+    padding: 0px $sradius 0px 17px;
+    display: inline-block;
+    width: 100px;
+    height: $search-height;
+}
+main{
+    border: 2px solid black;    
+}
+.container{
+    border: 2px solid black;    
+}
+
+@import 'menugrid';
+```
+
+# Adding views to our admin page
+
+Right now when we launch our server and navigate to `localhost:5000/admin` we are greeted with a nav bar with no views. 
+
+Lets change that. 
+First we have to configure our app to work with `SQLAlchemy`
+Lets edit our `__init__.py` to include `SQLAlchemy` by adding these two lines;
+
+```python
+from flask_sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy(raj)
+```
+
+`__init__.py`
+
+```python
+from flask import Flask
+from flask_scss import Scss
+from flask_admin import Admin
+from flask_sqlalchemy import SQLAlchemy
+
+raj = Flask(__name__)
+raj.config.from_object('config')
+db = SQLAlchemy(raj)
+
+Scss(raj, asset_dir='app/assets/scss', static_dir='app/static/css')
+admin = Admin(raj)
+
+from app import models, views
+```
+On the last line we import a file - `models` - which will define the records that we will eventually add to our admin views. 
+
+Now we have created an SQLAlchemy object called `db`. This is what will help us create a database that will subsequetly contain our `Users` and `FoodItems`.
+
+We have also defined certain configuration variables in a `config.py` file for simplicity;
+
+```python
+import os
+basedir = os.path.abspath(os.path.dirname(__file__))
+
+FLASK_ADMIN_SWATCH = 'cerulean'
+TEMPLATES_AUTO_RELOAD = False
+
+SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'raj.db')
+SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+WTF_CSRF_ENABLED = True
+SECRET_KEY = 'myrestaurant'
+WHOOSH_BASE = os.path.join(basedir, 'raj.db')
+```
+
+There are a number of ways in which we can create our database. We can begin a python shell within our virtual environment, import all our models the the config file and call `db.create__all()` which would create a database called `raj.db`. 
+
+Then we can experiment with adding and remove things to that database within that shell. We have to make sure that adding and remove stuff from our database can be done without any problems. 
+
+But of course we can't add objects whose models don't exist so let us create some models. 
+
+## Creating models 
+
+In part 1 of this series, we modeled a food item. We defined it as an object of certain attributes, more concretely;
+
+```python
+class FoodItem(db.Model):    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), unique=True, nullable=False)
+    desc = db.Column(db.String(250), unique=True, nullable=False)
+    price = db.Column(db.Float, unique=True, nullable=False)
+    prep_time = db.Column(db.Integer, unique=True, nullable=False)
+    #date = 
+
+    def __repr__(self):
+        return '<Food Item %r' % self.title
+```
+But that is not enough, owners of the restaurant would want to add and remove FoodItems as well as delete users so we need to define an owner;
+
+```python
+class Owner(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    
+    def __repr__(self):
+        return '<Admin %r>' % self.username
+```
+
+We also need to define who a user is as well. <br />
+Obviously, users don't have the same privileges as `administrators`/`owners`. <br />
+User's can't create new food items, edit or delete them. <br />
+They only controll the checkout cart. 
+
+```python
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    
+    def __repr__(self):
+        return '<Admin %r>' % self.username
+```
+We can also create views to control certain aspects of our `User` and `Owner` objects;
+
+```python
+class UserView(ModelView):
+    page_size = 50
+    can_create = True
+    can_edit = True
+    can_delete = False
+```
+
+And finally, we can add views to our `admin` page;
+
+```python
+admin.add_view(UserView(User, db.session))
+admin.add_view(ModelView(FoodItem, db.session))
+```
+
+The full code listing for `models.py`;
+
+```python
+from flask_admin.contrib.sqla import ModelView
+from app import admin, db
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    
+    def __repr__(self):
+        return '<User %r>' % self.username
+
+class Admin(User):        
+    def __repr__(self):
+        return '<Admin %r>' % self.username
+
+class FoodItem(db.Model):    
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(80), unique=True, nullable=False)
+    desc = db.Column(db.String(250), unique=True, nullable=False)
+    price = db.Column(db.Float, unique=True, nullable=False)
+    prep_time = db.Column(db.Integer, unique=True, nullable=False)
+    #date = 
+
+    def __repr__(self):
+        return '<FoodItem %r' % self.title
+
+class UserView(ModelView):
+    page_size = 50
+    can_create = True
+    can_edit = True
+    can_delete = False
+
+# Add views 
+admin.add_view(UserView(User, db.session))
+admin.add_view(ModelView(FoodItem, db.session))
+```
+
+Obviously our `models.py` will reside in our `app` folder, where our `views.py` is.
+
+## Creating our database. 
+### Postgresql
+If you have `postgresql` installed, you can create a database like so;
+```bash
+$ sudo -i
+$ su - postrges
+$ createdb mydb
+```
+Then you can;
+```bash
+psql username or pqsl postgres
+\l
+```
+To see if your database was created and who owns it. <br />
+I created a `raj_db` database and changed it's ownership to `lehbyte` - me. <br />
+ You can change ownership of any databse to any `linux` user registered on your machine.
+
+We need to create a `database engine` for SQLAlchemy;
+
+>The Engine is the starting point for any `SQLAlchemy` application. It’s “home base” for the actual database and its `DBAPI`, delivered to the SQLAlchemy application through a connection pool and a Dialect, which describes how to talk to a specific kind of database/`DBAPI` combination.
+
+So how do we create this engine;
+```python
+engine = create_engine('postgresql://scott:tiger@localhost:5432/mydatabase')
+```
+
+Here `scott` is the username, `tiger` is the password and `5432` refers to port on which to connect to `mydatabase`. But of course we have to change this `URI` to match our configuration. 
+Let us build our `URI` or `SQLALCHEMY_DATABASE_URI`. 
+
+We have; 
+
+Keys     | 	Values
+---------|-------------
+username | lehbyte
+password | mypassword
+database | raj_db
+
+Thus;
+
+`SQLALCHEMY_DATABASE_URI='postgresql://lehbyte:mypassword@localhost:5432/raj_db'`
+
+Now we can begin a `python` shelll;
+
+```python
+>>> from app import db, models
+>>> import config
+>>> db.create_all()
+```
+
+If you don't get any errors then it means the command `db.create_all()` was successfull.
+
+If you get any authentication issues, make sure that the password you are using is the actually password associated with your `linux` account. If you get any connection issues try a different port then close the python session and begin a new one with those changes.
+
+#### Adding data to our database
+Rember that we imported `models` into our python session so we can create 
+`users` and `food items` and add them to our `raj_db` database.
+
+```python
+>>> from app.models import User, FoodItem
+>>> kate = User(username='Kate', email='kate@email.com')
+>>> guest = User(username='Guest', email='guest@email.com')
+>>> kate, guest
+>>> (<User 'Kate'>,<User 'Guest'>)
+>>> db.session.add(kate)
+>>> db.session.add(guest)
+>>> db.session.commit()
+>>> User.query.all()
+>>> [<User 'Kate'>,<User 'Guest'>]
+```
+
+Now you are good to go. 
+
+### SQLite
+
+In SQLite creating a database is easy. <br />
+All we have to do is modify our `config.py`
+thus;
+`SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'raj.db')`
+
+Start a `python` shell, import the `db` and all the other things as before and just
+run `db.create.all()`
+
+Alternatively we could just create a `create_db.py` to handle most of this for us;
+
+```python
+# create database
+import os
+import basedir
+from sqlaclchemy import create_engine
+engine = create_engine('postgresql://username:mypassword@localhost:5432/mydb')
+#engine = create_engine('sqlite:///' + os.path.join(basedir, 'raj.db'))
+from app import db
+db.create_all()
+```
+
+
+## Security
+You may be worried about how we connect to our `postgresql` database and whether there's a secure way to do so without exposing our password. 
+
+You can use an `.env` file and include it in `.gitignore` <br />
+Put your password in this `.env` file;
+```python
+MY_PASSWORD='mypassword'
+```
+
+Then modify your `SQLALCHEMY_DATABASE_URI` thus;
+
+```python
+import pydotenv
+env = pydotenv.Environment()
+SQLALCHEMY_DATABASE_URI = 'postgresql://username:'+env['DB_PASSWORD']+'@localhost:5432/mydatabase'
+```
+
+This would be useful if your repo is publicly available. 
+
+# Concluding part 2
+
+One last thing we need to make sure is that we have `flask-scss` installed. 
+If it is not, then our `scss` won't be compiled into `css`. 
+
+One pain-point with `py-scss` is that you have to manually reload the page yourself. This is unacceptable especially given the fact that we will be heavily editing and and testing the `frontend` extensively. 
+
+Now you can try to set `TEMPLATES_AUTO_RELOAD` to `True` in your `config.py` but this will only work for `html templates` and not `stylesheets`. 
+
+Another alternative is to create a `gulpfile.js` in your `static` folder and have it execute your `run.py` script in a `child_process` but with `browserfy` enabled. This a tricky thing to do since our `python` server has to be up for us to use `flask-scss`. Going full `nodejs` will only make things worse, unless of course we want to switch the enrire framework to `nodejs`
+
+Alternatively, we can try to investigate how to work with `honcho` on this end. 
+
+In the third part of this tutorial we shall touch on the following points;
+>1. User management
+2. Better frontend
+3. Restricting access to owners
+4. Creating a checkout process
+5. Experimenting with a `nodejs` solution to `browsersync`
+
+Until then, happy coding. 

@@ -1,1 +1,2 @@
 - [ ] Create icon/logo with black footprints on yellow background.
+- [ ] Remove password before pushing

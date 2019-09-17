@@ -9,6 +9,9 @@ based on the `type-on-strap` jekyll theme.
 - Ocassional ramblings
 - Projects being worked on
 
+## TODO
+- [ ] Remove password from `config.py` before `commiting` and `pushing`.
+
 ## Contributions
 Are welcome
 
