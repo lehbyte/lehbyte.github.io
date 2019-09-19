@@ -2,7 +2,7 @@
   //padding-bottom: 1%;
   padding: 2% 2% 1% 2%;
   background: $brand-color;
-  display: inline-block;
+  display: block;
   float: left;
   width: 100%;
 
@@ -35,9 +35,17 @@
     font-weight: bold;
     font-family: $font-family-logo;
     font-size: 1.3em;
+    margin-right: 0;
+    padding-right: 0;
+    // border-top: 3px solid black;
+    border-bottom: 3px dotted black;    
+  }
+  .title2{
+    color: teal;    
   }
 
   nav {
+    font-family: $font-family-links;
     list-style: none;
     margin: 0;
     padding: 0;
@@ -48,19 +56,20 @@
       list-style: none;
       line-height: 1.5;
       float: right;
-      text-align: right;
+      text-align: center;
       display: block;
     }
 
-    li {
-      display: inline;
-      float: left;
+    li {      
+      display: block;
+      float: left;      
       margin-right: 0.4em;
     }
 
     a {
       &:hover {
         color: $link-color;
+        border-bottom: 2px dotted gray;
       }
 
       &#pull {
@@ -110,17 +119,18 @@
     }
   }
 
-  nav {
+  nav {    
     height: auto;
-
     .separator {
       display: none !important;
     }
 
     ul {
+      border-bottom-left-radius: 1em;
+      border-bottom-right-radius: 1em;
       width: 100%;
       overflow: hidden;
-
+      background: linear-gradient(gold, salmon);
       transition: font-size .25s,
       margin .25s,
       padding .25s,
@@ -140,9 +150,13 @@
       padding .5s .25s;
     }
 
-    li {
-      width: 100%;
-      float: left;
+    li {      
+      font-weight: bold;
+      font-size: 1.1em;
+      padding: 0.2em;
+      border: 2px solid white;
+      text-align: justify;
+      width: 100%;      
       position: relative;
     }
 
@@ -162,6 +176,10 @@
           right: 15px;
           top: 10px;
         }
+      }
+      &:hover{
+        color: white;
+        background: black;
       }
     }
   }

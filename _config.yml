@@ -1,7 +1,8 @@
 # SITE CONFIGURATION
 baseurl: "/"
 url: "https://lehbyte.github.io"
-title: Codewalk # site's title
+title: "Code" # site's title
+title2: "Walk" # second part of title
 description: "Code blog." # used by search engines
 
 defaults:
@@ -19,7 +20,7 @@ theme_settings:
   favicon: assets/favicon.ico
 
   # Header and footer text
-  header_text: Walk, a coder's way.
+  header_text: A path, through code.
   header_feature_image: /assets/img/pexels/header-bg2.png
 
   # Blog

@@ -1,8 +1,11 @@
+@import url('https://fonts.googleapis.com/css?family=Josefin+Sans&display=swap');
 // Typography
 $font-family-main: 'Source Sans Pro', Helvetica, Arial, sans-serif;
 $font-family-headings: 'Source Sans Pro', Helvetica, Arial, sans-serif;
 $font-family-logo: 'Source Sans Pro', Helvetica, Arial, sans-serif;
+$font-family-links: 'Josefin Sans', sans-serif;
 $font-size: 1.25em;
+
 
 // Padding
 $padding-x-large: 23%;
@@ -21,7 +24,7 @@ $sm-break: 576px;
 $x-sm-break: 300px;
 
 // Brand colours
-$theme-color: #337ab7;
+$theme-color: #0f6b6b; // #337ab7;
 $brand-color: #fff;
 $background-color: #fff;
 $border-color: rgba(0, 0, 0, 0.1); // rgba recommended if using feature images

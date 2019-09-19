@@ -96,9 +96,25 @@ header {
 
   .post-content {
     @extend %padding-post;
-    padding-bottom: 0;
+    padding-bottom: 0;    
   }
-
+  .post-content ol,
+  .post-content ul{
+    width: 77%;
+    padding: 4px;
+    margin-left: 2em;    
+    color: $theme-color;//#3b76a7;
+    li{      
+      // font-weight: bold;
+      // text-decoration: underline;
+      // border-bottom: 2px dotted gray;      
+      &::marker{        
+        font-weight: bold;
+        color: chocolate;
+      }
+    }
+  }
+  
   footer {
     @extend %padding-post;
     padding-top: 0;
