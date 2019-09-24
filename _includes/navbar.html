@@ -20,10 +20,10 @@
         </a>
 
         <!-- Menu -->
-        <div class="navwrap">
+
+        <div class="navoutter">
             <ul class="hide">
                 {% assign name_page = "" %}
-
                 {% for page in site.pages %}
                 {% unless page.title == null or page.hide or name_page contains page.title %}
                 <li class="separator"> | </li>

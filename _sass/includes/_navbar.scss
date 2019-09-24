@@ -127,10 +127,9 @@
 
     ul {
       border-bottom-left-radius: 1em;
-      border-bottom-right-radius: 1em;
-      width: 100%;
-      overflow: hidden;
-      background: linear-gradient(gold, salmon);
+      border-bottom-right-radius: 1em;      
+      overflow: hidden;      
+      background-color: beige;
       transition: font-size .25s,
       margin .25s,
       padding .25s,
@@ -152,18 +151,12 @@
 
     li {      
       font-weight: bold;
-      font-size: 1.1em;
-      padding: 0.2em;
-      border: 2px solid white;
-      text-align: justify;
-      width: 100%;      
+      font-size: 1.1em;      
+      border-bottom: 2px solid white;            
       position: relative;
-    }
-
-    a {
-      text-align: left;
       width: 100%;
-
+    }    
+    a {      
       &#pull {
         display: block;
         width: 100%;
@@ -176,10 +169,6 @@
           right: 15px;
           top: 10px;
         }
-      }
-      &:hover{
-        color: white;
-        background: black;
       }
     }
   }
