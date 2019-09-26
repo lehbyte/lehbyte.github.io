@@ -1,12 +1,19 @@
 ---
-layout: post
+layout: single
+header:
+  teaser: "checkout.png"
+categories: 
+  - Flask
+tags:
+  - checkout flask python
+# layout: post
 title: Check-it-out - Part 4
-color: seagreen
+# color: seagreen
 # feature-img: "assets/img/pexels/header-bg2.png"
-thumbnail: "assets/img/pexels/header-bg2.png"
+# thumbnail: "assets/img/pexels/header-bg2.png"
 # image: "assets/img/pexels/header-bg2.png"
-tags: [Flask, Scratch, Four, Backend, Database, Connections]
-author-id: lehbyte
+# tags: [Flask, Scratch, Four, Backend, Database, Connections]
+# author-id: lehbyte
 ---
 
 In part 3 we saw how to add admin views to our app.

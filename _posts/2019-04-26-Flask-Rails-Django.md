@@ -1,22 +1,30 @@
 ---
 layout: post
-title: Flask, Rails, and Django Compared
-feature-img: "assets/img/pexels/codeview.jpeg"
-thumbnail: "assets/img/pexels/codeview.jpeg"
-image: "assets/img/pexels/codeview.jpeg"
+title: Comparing Flask, Django, and Rails
+feature-img: "assets/img/pexels/frameworks_feature.png"
+thumbnail: "assets/img/pexels/frameworks_feature.png"
+image: "assets/img/pexels/frameworks_feature.png"
 tags: [Flask, Frameworks, Rails, Django, Comparison]
 author-id: lehbyte
 ---
 
-Flask is a very simple python-based framework – oops, micro-framework.
-Yep, flask does not require any specific libraries or tools.
-If your thinking of building a database heavy app, then look elsewhere because flask has no database abstraction layer to streamline your requests. And did I mention the lack of validation.
+Flask is a very simple python-based micro framework for developing web apps. <br/> 
+It's light, flexible, and easy to learn and extensible. <br/>
+It's as capable as `django` or `bottle` and other python-frameworks. <br/>
 
-But what flask lacks in those areas, it makes up for in a dedicated extension library. The extensions range from handling mail to bootstrapping your flask app. And more are on the way given an active developer community.
+That being said, I think when it comes quickly building a database heavy web app, you'd better off with a framework like `django`. <br />
+Why? Flask simply lacks a database abstraction layer to streamline app development. <br/>
+While that should not deter anyone from using it, it makes for time consuming setups, time that should be spent developing the app. <br />
 
-Flask is easy too, just take a look at what it takes to have an up and running flask app;
+But what flask lacks in database abstraction it makes up for in a dedicated extension library.<br/> These are python packages that have been created to work with flask. <br/>
 
-**Sample flask code block**
+Their purposes range from mail handling to `login` and `database` management. <br /> It's on of the reasons why `flask` is regarded as an extensible, flexible and light weight framework.
+
+>“Micro” does not mean that your whole web application has to fit into a single Python file (although it certainly can), nor does it mean that Flask is lacking in functionality. The “micro” in microframework means Flask aims to keep the core simple but extensible. Flask won’t make many decisions for you, such as what database to use. Those decisions that it does make, such as what templating engine to use, are easy to change. Everything else is up to you, so that Flask can be everything you need and nothing you don’t. - *Pallets*
+
+With an active community, expect to see more extensions as you begin your `flask` development journey. 
+
+**app.py**
 
 ```python
 from flask import Flask
@@ -32,11 +40,16 @@ if __name__=='__main__':
 
 ## Origins
 
-Flask is based on Werkzeug and Jinja2
+Flask is based on `Werkzeug` for the server and `Jinja2` for the `html` template engine. <br/>
+Werkzeug is a comprehensive WSGI web application library. The most attractive things about werkzeug are; 
+1. An interactive debugger that allows for stack trace inspections, 
+2. A fully-featured request `object`
+3. A response object
+4. A routing system for matching `URLs` to endpoints and generating `URLs` for endpoints, with an extensible system for capturing variables from `URL`, a threaded WSGI server for use while developing applications locally, 
+5. A test client for simulating `HTTP` requests during testing without requireing running a server.
 
-Werkzeug is a comprehensive WSGI web application library. The most attractive things about werkzeug are; an interactive debugger that allows for stack trace inspections, a fully-featured request object, a response object, a routing system for matching URLs to endpoints and generating URLs for endpoints, with an extensible system for capturing variables from url, a threaded WSGI server for use while developing applications locally, a test client for simulating HTTP requests during testing without requireing running a server.
 
-example;
+**Here's an example of a werkzeug server**;
 
 ```python
 from werkzeug.wrappers import Request, Response
@@ -47,15 +60,15 @@ def application(request):
 
 if __name__ =='__main__':
     from werkzeug.serving import run_simple
-    run_simple('localhost', 4000, application
+    run_simple('localhost', 4000, application)
 ```
 
-What that does is simply render ‘Hello, World!’ in your browser window.
-
+What it does is simply render `Hello, World!` in your browser window, very similar to what our `app.py` did. <br/>
 There multiple usages of this Flask code for example in `flask/flask/cli.py`
 
 (around line 702);
 
+**flask/flask/cli.py**
 ```python
 def run_command(info, host, port, reload, debugger, eager_loading,
                 with_threads, cert):
@@ -88,8 +101,9 @@ def run_command(info, host, port, reload, debugger, eager_loading,
 
 ## Jinja2
 
-Jinja is a template engine for the Python programming language. It was written by Flask’s author. Sample code;
+Jinja is a python-based template engine written by Flask’s creator.
 
+**Sample code**
 ```python
 {% raw %}
 {% extends "layout.html" %}
@@ -112,19 +126,7 @@ Jinja is a template engine for the Python programming language. It was written b
 - Optional ahead-of-time compilation
 - many more
 
-## Some recommendations
-
-If you are starting out with flask I’d recommend Miguel Grinberg’s tutorial which is free.  He initially wrote a tutorial about building a simple micro-blogging app back in 2014.  Its popularity lead to users supporting him to dedicate his time and knowledge in developing “The New and Improved Flask Mega Tutorial” which he made available online for free!
-
-The tutorial is really well organized and easy to follow and in case you run in to any problems chances are that someone in the comments section has had the same problem and it has probably been answered.
-Miguel runs the site on which the tutorial is hosted and responds pretty fast to comments so check the comment section before running off to google or Stack Overflow.
-
-**I highly recommend the following books** – in that order;
-
-> 1. [The New and Improved Flask Mega Tutorial](https://amzn.to/2PAyc4Q) by ***Miguel Grinberg***
-> 2. [ Flask Framework Cookbook ](https://amzn.to/2IXmorY) by ***Shalab A***
-
-I recommend the second book if you are deeply familiar with flask and want to do something even more involve.
+---
 
 # Ruby-on-Rails
 
@@ -137,14 +139,12 @@ The main philosophy behind rails is;
 
 Suppose your app has two seperate pages that perfom two opperations that form a single continuous process or are part of a multi stage process. Rather than control them seperately, it would be better to have one controller and combine those two actions into one in one view.
 
-## Beginning
-
-For beginners, I would like to recommend;
-> [Learn Ruby For Web Development: Learn Rails The Fast and Easy Way](https://amzn.to/2DAiSAp) ***by John Elder***
+## Starting with Rails
 
 To start using rails, you have to first make sure that you have ruby installed. You can do so buy running ruby -v. If ruby is installed then the result will be a short description of the version of ruby installed on your system.
 
-I recommend using rvm; ruby version manager, which is kind of similar to pip for python. Below is a list of steps to get started with ruby.
+I recommend using `rvm` - ruby version manager - which is similar to `pip` for python. <br/>
+Below is a list of steps to get started with `ruby`;<br/>
 
 ```bash
 sqlite3 --version
@@ -180,6 +180,8 @@ The basic structure of your apps directory should be;
     .gitignore
     .ruby-version
 ```
+
+Lets break this down some more;
 
 ### `app/`
 This is for the controllers, models, views, helpers, mailers, channels, jobs, and assets of your application.
@@ -259,11 +261,9 @@ what to exclude from your git repo.
 contains the default ruby version for your application
 
  
-As you can see, compared to Flask, rails has a lot of inbuilt features. You can very easily use a variety of nodejs modules for your frontend something which I don’t think is easy with Flask or django.
+Unlike `Flask`, Rails comes a lot of inbuilt features. Getting started is just as easy as configuring a few things. <br/> And, you can integrate nodejs into the `frontend` and let ruby handle the backend easily. <br/> This is not as easy to do in `Flask` or `Django`.  
 
-If you are serious about developing rails apps  then I recommend;
-
-> [The Rails 5](https://amzn.to/2IJixQ4) - ***Obie Fernandez***
+---
 
 # Django
 
@@ -281,7 +281,6 @@ Use a database that supports these features;
 - good dashborads or visuals.
 
 
-
 These are some of the features Django tries to support;
 
 - Encoding
@@ -296,12 +295,6 @@ Django follows the M-V-T (Model-View-Template) architectual pattern which is ver
 By supporting a large number of database features Django seeks to make the creation of complex database-driven website as easy as possible.
 
 Like rails, there’s an emphasis on reusability of components, less code, and the DRY principle. You can easily build a complex app with less code with Django.
-
-**If you’re a beginner, I recommend**
-
-> 1. [Django for Benginners: Build websites with Python and Django](https://amzn.to/2W3Odm6) by ***William S Vincent***
-> 2. [Test Driven Development with Python](https://amzn.to/2XMq6Jk) by ***Harry Percival***
-> 3. [Django for APIs: Build web API's with Python and Django](https://amzn.to/2Dzpy1v) by ***William S Vincent***
 
 ## Writing a Simple Django App
 
@@ -338,12 +331,47 @@ mysite/wsgi.py:
 python manage.py startapp yourapp
 ```
 
-## Concluding
+---
 
-By now you should have a pretty decent picture of the advantages and disadvantages of using each one of these three frameworks. 
+# Recommendations for beginers
 
-Somethings are easier done in one framework while others are easier done in another. The choice of what framework to use depends on your needs. You wouldn't want to sacrifice ease of use for extensibility. Choose wisely.
+## Flask
 
-If you spot any grammatical errors or punctuation errors, please point them out in the comment section bellow and as always, suggestions are welcome. 
+If you are starting out with flask I’d recommend Miguel Grinberg’s tutorial which is free.  He initially wrote a tutorial about building a simple micro-blogging app back in 2014.  Its popularity lead to users supporting him to dedicate his time and knowledge in developing “The New and Improved Flask Mega Tutorial” which he made available online for free!
 
-May the `code` be with you. :)
+The tutorial is really well organized and easy to follow and in case you run in to any problems chances are that someone in the comments section has had the same problem and it has probably been answered.
+Miguel runs the site on which the tutorial is hosted and responds pretty fast to comments so check the comment section before running off to google or Stack Overflow.
+
+**I highly recommend the following books** – in order;
+
+> 1. [The New and Improved Flask Mega Tutorial](https://amzn.to/2PAyc4Q) by ***Miguel Grinberg***
+> 2. [ Flask Framework Cookbook ](https://amzn.to/2IXmorY) by ***Shalab A***
+
+The second book is for `flask` programmers who want to go further with `flask`. 
+
+
+## Ruby
+
+For beginners, I would like to recommend;
+> [Learn Ruby For Web Development: Learn Rails The Fast and Easy Way](https://amzn.to/2DAiSAp) ***by John Elder***
+[The Rails 5](https://amzn.to/2IJixQ4) - ***Obie Fernandez***
+
+
+## Django
+
+> 1. [Django for Benginners: Build websites with Python and Django](https://amzn.to/2W3Odm6) by ***William S Vincent***
+> 2. [Test Driven Development with Python](https://amzn.to/2XMq6Jk) by ***Harry Percival***
+> 3. [Django for APIs: Build web API's with Python and Django](https://amzn.to/2Dzpy1v) by ***William S Vincent***
+
+---
+
+# Final thoughts
+
+By now you should have a pretty decent picture of the benefits of using `flask`, `rails` and `django`. 
+
+Some of you may find somethings easier in one framework and others in another.<br/> The goal is to test the limits of each as much as you can, wherever you can. <br/> This will allow you to hit the ground running upon beginning a new project. <br/>
+
+Ultimately, the choice of what framework to use will depend on your needs/requirements.<br/>
+Do not sacrifice ease of use for `extensibility`. Choose wisely.
+
+Lastly, if you spot any grammatical errors or punctuation errors, please point them out in the comment section bellow and as always, happy coding.  :)
