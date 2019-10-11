@@ -42,6 +42,7 @@ layout: default
 <!-- To change color of links in the page -->
 <style>
   {% if page.color %}
+  .post-content ol, .post-content ul  { color: {{ page.color }} !important; }
     .feature-image a { color: {{ page.color }} !important; }
     div#post-nav a { color: {{ page.color }} !important; }
     footer a { color: {{ page.color }} !important; }
