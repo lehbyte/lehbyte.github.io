@@ -1,0 +1,65 @@
+I"�<p>Hello. It’s been a while.</p>
+
+<h2 id="the-problem-localhost-is-unreachable">The problem: localhost is unreachable</h2>
+<p>While following this <a href="https://flask-restful.readthedocs.io/en/latest/quickstart.html">this</a> tutorial on how to setup a flask API i encountered an error while attempting to <code class="highlighter-rouge">PUT</code> or <code class="highlighter-rouge">POST</code> data;</p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>curl http://localhost:5000/todo1 <span class="nt">-d</span> <span class="s2">"data=Remember the milk"</span> <span class="nt">-X</span> PUT
+</code></pre></div></div>
+
+<h2 id="the-error">The error</h2>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Python 2.7.18 <span class="o">(</span>default, Mar  8 2021, 13:02:45<span class="o">)</span> 
+<span class="o">[</span>GCC 9.3.0] on linux2
+Type <span class="s2">"help"</span>, <span class="s2">"copyright"</span>, <span class="s2">"credits"</span> or <span class="s2">"license"</span> <span class="k">for </span>more information.
+<span class="o">&gt;&gt;&gt;</span> from requests import put, get
+<span class="o">&gt;&gt;&gt;</span> put<span class="o">(</span><span class="s1">'http://localhost:5000/todo1'</span>, <span class="nv">data</span><span class="o">={</span><span class="s1">'data'</span>: <span class="s1">'Remember the milk'</span><span class="o">})</span>.json<span class="o">()</span>
+Traceback <span class="o">(</span>most recent call last<span class="o">)</span>:
+  File <span class="s2">"&lt;stdin&gt;"</span>, line 1, <span class="k">in</span> &lt;module&gt;
+  ...
+requests.exceptions.ConnectionError: HTTPConnectionPool<span class="o">(</span><span class="nv">host</span><span class="o">=</span><span class="s1">'localhost'</span>,
+<span class="nv">port</span><span class="o">=</span>5000<span class="o">)</span>: Max retries exceeded with url: /todo1 
+<span class="o">(</span>Caused by NewConnectionError<span class="o">(</span><span class="s1">'&lt;urllib3.connection.HTTPConnection object at
+ 0x7f56d6bd0dd0&gt;: Failed to establish a new connection: [Errno 111] Connection
+  refused'</span>,<span class="o">))</span>
+</code></pre></div></div>
+
+<h2 id="attempt-1">Attempt 1</h2>
+<p>Now I was using the same virtual environment to <code class="highlighter-rouge">GET</code> and <code class="highlighter-rouge">POST</code> data from the site.
+I thought that using <code class="highlighter-rouge">/usr/bin/python</code> for one method and the virtual environment for the other would solve the issue. 
+But it did not.</p>
+
+<h2 id="attempt-2">Attempt 2</h2>
+
+<p>While typing out <code class="highlighter-rouge">localhost</code> in my browser’s addressbar <code class="highlighter-rouge">customName</code> (not excatly but it was my own custom name) popped-up on the list and the idea of substituting <code class="highlighter-rouge">customName</code> for <code class="highlighter-rouge">localhost</code> presented itself.</p>
+
+<p>I confirmed this using <code class="highlighter-rouge">usr/bin/python</code> and also from my <code class="highlighter-rouge">virtualenv</code>;</p>
+
+<p><strong>using my machine’s python</strong></p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$yourname</span>@customName curl http://customName:5000/todo1 <span class="nt">-d</span> <span class="s2">"data=Remember the milk"</span> <span class="nt">-X</span> PUT
+<span class="o">{</span>
+    <span class="s2">"todo1"</span>: <span class="s2">"Remember the milk"</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p><strong>from the virtualenv</strong></p>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$yourname</span>@customName curl http://customName:5000/todo1 <span class="nt">-d</span> <span class="s2">"data=Remember the milk"</span> <span class="nt">-X</span> PUT
+<span class="o">{</span>
+    <span class="s2">"todo1"</span>: <span class="s2">"Remember the milk"</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h2 id="things-to-keep-in-mind">Things to keep in mind</h2>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$vi</span> /etc/hosts
+127.0.0.1 customName
+127.0.1.1 localhost
+
+<span class="c"># The following lines are desirable for IPv6 capable hosts</span>
+...
+</code></pre></div></div>
+
+<p>Happy coding!</p>
+:ET

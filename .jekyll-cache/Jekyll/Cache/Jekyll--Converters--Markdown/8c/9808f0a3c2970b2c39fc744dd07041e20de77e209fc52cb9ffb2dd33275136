@@ -1,0 +1,84 @@
+I"�<p>I’m still working on the <code class="highlighter-rouge">raj</code> restaurant app and will be posting details soon on the progress I’ve made thus far. <br /> Briefly, I have made some neat changes on the frontend and some minor changes on the models which is where I’m stuck at the moment. <br /> For those following these posts, you may have found yourself in a similar situation. I’m working on a solution to fix migration errors that usually result from typos/mistakes on the programmer’s part. <br />
+With that, let’s dive into today’s post.</p>
+
+<p>In understanding how to design algorithms it is often helpful to prove to others that your algorithm is correct. Many programmers think that having an algorithm that works is enough to show that it is correct. That may not necessarily be the case. And it may not be enough. <br /> You may design a perfectly owrking algorithm that is wrong.</p>
+
+<h2 id="correctness">Correctness</h2>
+<p>Thinking about an algorithm’s correctness will deepen your understanding of how and why it works. <br /> Once you understand why a certain algorithm is correct, filling out minute details will be much more easier. This also means that you don’t have to memorize certain aspects of said algorithm. <br /></p>
+
+<p>What is a correct algorithhm then? To understand that, you need to define a computational model under which programs operate. <br /> This is also useful for algorithmic analysis.</p>
+
+<p>The need for algorithmic analysis is important, and essential because, unlike natural numbers - for lack of a better analogy, computing resources are finite. <br />
+So utilizing CPU cycles or program runtimes and memory consumption becomes important.</p>
+
+<p>How then do you prove that an algorithm is correct? <br />
+First, understand how the algorithm works. This makes the next step easier.</p>
+
+<p>Second, choose your method of proof. This will usually become evident once you understand the ins and outs of your algorithm.</p>
+
+<p>Third, leave no stone unturned. Use clear language, English or math with emphasis on the gist/crux of the proof.</p>
+
+<h2 id="an-example">An example</h2>
+<p>Let us look at an example in C++.</p>
+
+<p>You may be familiar with the <code class="highlighter-rouge">insertion sort</code> algorithm. It’s one of the few algorithms that comes naturally to mind when you think of sorting algorithms because of the way it works - like card sorting. <br /></p>
+
+<p>When you’re sorting cards you usually start from the left, making insertions from your left. <br /> As you do so, you build a sorted hand whose size increases until there are no more cards left to sort; it’s size becomes the size of your original hand; assuming - of course - that you haven’t added any new cards to your hand. <br /></p>
+
+<p>So what does an implementation of insertion sort look like; here’s one in <code class="highlighter-rouge">c++</code>.</p>
+
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span><span class="o">&lt;</span> <span class="k">typename</span> <span class="nc">T</span> <span class="p">&gt;</span>
+<span class="kt">void</span> <span class="nf">insertion_sort</span><span class="p">(</span> <span class="n">T</span> <span class="n">A</span><span class="p">[],</span> <span class="kt">size_t</span> <span class="n">length</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">;</span>
+    <span class="n">T</span> <span class="n">key</span><span class="p">;</span>
+    <span class="k">for</span><span class="p">(</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span> <span class="p">){</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="k">while</span><span class="p">(</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">A</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">key</span> <span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">A</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">A</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">key</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="verifying-correctness">Verifying correctness</h2>
+<p>The <code class="highlighter-rouge">insertion_sort</code> algorithm lends itself well to an <code class="highlighter-rouge">induction proof</code> and it’s easy to see why; every time you select a new key you end up with a sorted sub array with 1 element more than it had before the selection.</p>
+
+<p>It’s easy to see that the sub-array is bounded by the size of the original array, well because there are only A.length keys in the array and if an insertion only happens upon the selection of a new key what will you have when there are no more keys to consider - a sorted array.</p>
+
+<p>Let’s be a little clear;
+We have an unsorted array of length L. 
+We have a sorted array that begins at length 0 which makes sense because we are yet to consider any keys for sorting.</p>
+
+<h3 id="assumptions">assumptions</h3>
+<p>Our hypothesis is that the sub-array is already sorted. For that to be true, the following facts have to hold for any item we chose in that sub-array;</p>
+<ol>
+  <li>All items to the right of that element/item are greater than or equal to it and</li>
+  <li>All items to the left of that element/item are strictly less than it.</li>
+</ol>
+
+<p>Both those statements are true when we start out in the beginning because we haven’t considered any keys and the subarray has length 0.</p>
+
+<p>It is also obvious when we add the first item to the sub-array but this is what we have to prove. <br />
+In fact, we have to prove that our sub-array of <code class="highlighter-rouge">n</code> elements (where n starts at 0 ) remains sorted after we insert the <code class="highlighter-rouge">n+1</code> item. <br /></p>
+
+<h3 id="n--1">n + 1</h3>
+<p>While considering the <code class="highlighter-rouge">n+1</code> element/item, when do we make an insertion?<br />
+We make an insertion into our sub-array by using the two important properties of our hypothesis;</p>
+<ol>
+  <li>All items to the right of that element/item are greater than or equal to it and</li>
+  <li>All items to the left of that element/item are strictly less than it.</li>
+</ol>
+
+<p>So we shift all elements that don’t satisfy it to the right by one step and only make an insertion at the space that is created as a result of this shifting operation. 
+This happens when we exit the while loop. And upon considering the next element the two original 
+facts about our now <code class="highlighter-rouge">n+1</code> sub-array will still be intact.</p>
+
+<p>And that is sufficient to show that the algorithm is correct.</p>
+
+<p>Happy coding. :)</p>
+:ET

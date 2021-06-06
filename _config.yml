@@ -21,7 +21,7 @@ theme_settings:
 
   # Header and footer text
   header_text: A path, through code.
-  header_feature_image: /assets/img/pexels/header-bg2.png
+  header_feature_image: /assets/img/pexels/header.jpg
 
   # Blog
   excerpt: true # Or "truncate" (first 250 characters), "false" to disable

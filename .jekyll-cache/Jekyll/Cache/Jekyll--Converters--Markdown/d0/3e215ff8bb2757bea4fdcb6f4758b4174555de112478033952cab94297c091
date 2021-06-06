@@ -1,0 +1,377 @@
+I"S^<p>Flask is a very simple python-based micro framework for developing web apps. <br /> 
+It’s light, flexible, and easy to learn and extensible. <br />
+It’s as capable as <code class="highlighter-rouge">django</code> or <code class="highlighter-rouge">bottle</code> and other python-frameworks. <br /></p>
+
+<p>That being said, I think when it comes quickly building a database heavy web app, you’d better off with a framework like <code class="highlighter-rouge">django</code>. <br />
+Why? Flask simply lacks a database abstraction layer to streamline app development. <br />
+While that should not deter anyone from using it, it makes for time consuming setups, time that should be spent developing the app. <br /></p>
+
+<p>But what flask lacks in database abstraction it makes up for in a dedicated extension library.<br /> These are python packages that have been created to work with flask. <br /></p>
+
+<p>Their purposes range from mail handling to <code class="highlighter-rouge">login</code> and <code class="highlighter-rouge">database</code> management. <br /> It’s on of the reasons why <code class="highlighter-rouge">flask</code> is regarded as an extensible, flexible and light weight framework.</p>
+
+<blockquote>
+  <p>“Micro” does not mean that your whole web application has to fit into a single Python file (although it certainly can), nor does it mean that Flask is lacking in functionality. The “micro” in microframework means Flask aims to keep the core simple but extensible. Flask won’t make many decisions for you, such as what database to use. Those decisions that it does make, such as what templating engine to use, are easy to change. Everything else is up to you, so that Flask can be everything you need and nothing you don’t. - <em>Pallets</em></p>
+</blockquote>
+
+<p>With an active community, expect to see more extensions as you begin your <code class="highlighter-rouge">flask</code> development journey.</p>
+
+<p><strong>app.py</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<span class="o">@</span><span class="n">app</span><span class="p">.</span><span class="n">route</span><span class="p">(</span><span class="s">"/"</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">hello</span><span class="p">():</span>
+    <span class="k">return</span> <span class="s">"Hello World!"</span>
+
+<span class="k">if</span> <span class="n">__name__</span><span class="o">==</span><span class="s">'__main__'</span><span class="p">:</span>
+    <span class="n">app</span><span class="p">.</span><span class="n">run</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h2 id="origins">Origins</h2>
+
+<p>Flask is based on <code class="highlighter-rouge">Werkzeug</code> for the server and <code class="highlighter-rouge">Jinja2</code> for the <code class="highlighter-rouge">html</code> template engine. <br />
+Werkzeug is a comprehensive WSGI web application library. The most attractive things about werkzeug are;</p>
+<ol>
+  <li>An interactive debugger that allows for stack trace inspections,</li>
+  <li>A fully-featured request <code class="highlighter-rouge">object</code></li>
+  <li>A response object</li>
+  <li>A routing system for matching <code class="highlighter-rouge">URLs</code> to endpoints and generating <code class="highlighter-rouge">URLs</code> for endpoints, with an extensible system for capturing variables from <code class="highlighter-rouge">URL</code>, a threaded WSGI server for use while developing applications locally,</li>
+  <li>A test client for simulating <code class="highlighter-rouge">HTTP</code> requests during testing without requireing running a server.</li>
+</ol>
+
+<p><strong>Here’s an example of a werkzeug server</strong>;</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">werkzeug.wrappers</span> <span class="kn">import</span> <span class="n">Request</span><span class="p">,</span> <span class="n">Response</span>
+
+<span class="o">@</span><span class="n">Request</span><span class="p">.</span><span class="n">application</span>
+<span class="k">def</span> <span class="nf">application</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="s">'Hello, World!'</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span><span class="s">'__main__'</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">werkzeug.serving</span> <span class="kn">import</span> <span class="n">run_simple</span>
+    <span class="n">run_simple</span><span class="p">(</span><span class="s">'localhost'</span><span class="p">,</span> <span class="mi">4000</span><span class="p">,</span> <span class="n">application</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>What it does is simply render <code class="highlighter-rouge">Hello, World!</code> in your browser window, very similar to what our <code class="highlighter-rouge">app.py</code> did. <br />
+There multiple usages of this Flask code for example in <code class="highlighter-rouge">flask/flask/cli.py</code></p>
+
+<p>(around line 702);</p>
+
+<p><strong>flask/flask/cli.py</strong></p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">run_command</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="nb">reload</span><span class="p">,</span> <span class="n">debugger</span><span class="p">,</span> <span class="n">eager_loading</span><span class="p">,</span>
+                <span class="n">with_threads</span><span class="p">,</span> <span class="n">cert</span><span class="p">):</span>
+    <span class="s">"""Run a local development server.
+
+    This server is for development purposes only. It does not provide
+    the stability, security, or performance of production WSGI servers.
+
+    The reloader and debugger are enabled by default if
+    FLASK_ENV=development or FLASK_DEBUG=1.
+    """</span>
+    <span class="n">debug</span> <span class="o">=</span> <span class="n">get_debug_flag</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="nb">reload</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="nb">reload</span> <span class="o">=</span> <span class="n">debug</span>
+
+    <span class="k">if</span> <span class="n">debugger</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">debugger</span> <span class="o">=</span> <span class="n">debug</span>
+
+    <span class="k">if</span> <span class="n">eager_loading</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">eager_loading</span> <span class="o">=</span> <span class="ow">not</span> <span class="nb">reload</span>
+
+    <span class="n">show_server_banner</span><span class="p">(</span><span class="n">get_env</span><span class="p">(),</span> <span class="n">debug</span><span class="p">,</span> <span class="n">info</span><span class="p">.</span><span class="n">app_import_path</span><span class="p">,</span> <span class="n">eager_loading</span><span class="p">)</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">DispatchingApp</span><span class="p">(</span><span class="n">info</span><span class="p">.</span><span class="n">load_app</span><span class="p">,</span> <span class="n">use_eager_loading</span><span class="o">=</span><span class="n">eager_loading</span><span class="p">)</span>
+
+    <span class="kn">from</span> <span class="nn">werkzeug.serving</span> <span class="kn">import</span> <span class="n">run_simple</span>
+<span class="o">*</span>       <span class="n">run_simple</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">use_reloader</span><span class="o">=</span><span class="nb">reload</span><span class="p">,</span> <span class="n">use_debugger</span><span class="o">=</span><span class="n">debugger</span><span class="p">,</span>
+               <span class="n">threaded</span><span class="o">=</span><span class="n">with_threads</span><span class="p">,</span> <span class="n">ssl_context</span><span class="o">=</span><span class="n">cert</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="jinja2">Jinja2</h2>
+
+<p>Jinja is a python-based template engine written by Flask’s creator.</p>
+
+<p><strong>Sample code</strong></p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="p">{</span><span class="o">%</span> <span class="n">extends</span> <span class="s">"layout.html"</span> <span class="o">%</span><span class="p">}</span>
+<span class="p">{</span><span class="o">%</span> <span class="n">block</span> <span class="n">body</span> <span class="o">%</span><span class="p">}</span>
+  <span class="o">&lt;</span><span class="n">ul</span><span class="o">&gt;</span>
+  <span class="p">{</span><span class="o">%</span> <span class="k">for</span> <span class="n">user</span> <span class="ow">in</span> <span class="n">users</span> <span class="o">%</span><span class="p">}</span>
+    <span class="o">&lt;</span><span class="n">li</span><span class="o">&gt;&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s">"{{ user.url }}"</span><span class="o">&gt;</span><span class="p">{{</span> <span class="n">user</span><span class="p">.</span><span class="n">username</span> <span class="p">}}</span><span class="o">&lt;/</span><span class="n">a</span><span class="o">&gt;&lt;/</span><span class="n">li</span><span class="o">&gt;</span>
+  <span class="p">{</span><span class="o">%</span> <span class="n">endfor</span> <span class="o">%</span><span class="p">}</span>
+  <span class="o">&lt;/</span><span class="n">ul</span><span class="o">&gt;</span>
+<span class="p">{</span><span class="o">%</span> <span class="n">endblock</span> <span class="o">%</span><span class="p">}</span>
+
+</code></pre></div></div>
+
+<h3 id="jinja-features">Jinja features</h3>
+
+<ul>
+  <li>Sandboxed execution mode</li>
+  <li>Powerful automatic HTML escaping system</li>
+  <li>Template inheritance</li>
+  <li>High  performance</li>
+  <li>Optional ahead-of-time compilation</li>
+  <li>many more</li>
+</ul>
+
+<hr />
+
+<h1 id="ruby-on-rails">Ruby-on-Rails</h1>
+
+<p>Ruby on rails or rails is perhaps one of the most widely used server-side web application frameworks. Unlike Flask, rails provides default structures for a database, web service and webpages and follows the MVC architectural pattern.</p>
+
+<p>The main philosophy behind rails is;</p>
+
+<ul>
+  <li><em>DRY (Do not repeat yourself)</em></li>
+  <li><em>COC (Convention over configuration)</em></li>
+</ul>
+
+<p>Suppose your app has two seperate pages that perfom two opperations that form a single continuous process or are part of a multi stage process. Rather than control them seperately, it would be better to have one controller and combine those two actions into one in one view.</p>
+
+<h2 id="starting-with-rails">Starting with Rails</h2>
+
+<p>To start using rails, you have to first make sure that you have ruby installed. You can do so buy running ruby -v. If ruby is installed then the result will be a short description of the version of ruby installed on your system.</p>
+
+<p>I recommend using <code class="highlighter-rouge">rvm</code> - ruby version manager - which is similar to <code class="highlighter-rouge">pip</code> for python. <br />
+Below is a list of steps to get started with <code class="highlighter-rouge">ruby</code>;<br /></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sqlite3 <span class="nt">--version</span>
+gem <span class="nb">install </span>rails
+rails <span class="nt">--version</span>
+rails new blog
+<span class="nb">cd </span>blog
+bin/rails server
+bin/rails generate controller Welcome index
+config/routes.rb
+
+bin/rails generate controller Articles
+class ArticlesController &lt; ApplicationController
+</code></pre></div></div>
+
+<p>The basic structure of your apps directory should be;</p>
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="s">app/</span>
+    <span class="s">bin/</span>
+    <span class="s">config</span>
+    <span class="s">config.ru</span>
+    <span class="s">db/</span>
+    <span class="s">Gemfile and Gemfile.lock</span>
+    <span class="s">lib/</span>
+    <span class="s">log/</span>
+    <span class="s">package.json</span>
+    <span class="s">public/</span>
+    <span class="s">Rakefule</span>
+    <span class="s">README.md [optional]</span>
+    <span class="s">test/</span>
+    <span class="s">tmp/</span>
+    <span class="s">vendor/</span>
+    <span class="s">.gitignore</span>
+    <span class="s">.ruby-version</span>
+</code></pre></div></div>
+
+<p>Lets break this down some more;</p>
+
+<h3 id="app"><code class="highlighter-rouge">app/</code></h3>
+<p>This is for the controllers, models, views, helpers, mailers, channels, jobs, and assets of your application.</p>
+
+<h3 id="bin"><code class="highlighter-rouge">bin/</code></h3>
+<p>Contains scripts for starting your app, setups, update, deployment.
+You will also use to generate controllers for for your views</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>bin/rails server
+<span class="nv">$ </span>bin/rails generate controller About index
+</code></pre></div></div>
+
+<h3 id="config"><code class="highlighter-rouge">config/</code></h3>
+<p>This is where you will configure your application’s routes, database, and more.  It contains files such as;</p>
+
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="s">application.rb (initialization code)</span>
+    <span class="s">boot.rb</span>
+    <span class="s">cable.yml</span>
+    <span class="s">credentials.yml.enc</span>
+    <span class="s">database.yml</span>
+    <span class="s">environment.rb</span>
+    <span class="s">environments/</span>
+    <span class="s">initializers/</span>
+    <span class="s">locales/</span>
+    <span class="s">master.key</span>
+    <span class="s">puma.rb (Web server built for concurrency)</span>
+    <span class="s">routes.rb (where you’ll add routes for your controllers)</span>
+    <span class="s">spring.rb</span>
+    <span class="s">storage.yml</span>
+</code></pre></div></div>
+
+<h3 id="configru"><code class="highlighter-rouge">config.ru</code></h3>
+<p>Used by rack-based servers to start the application. Rack is a webserver interface  between webservers that support ruby and ruby frameworks.</p>
+
+<h3 id="db"><code class="highlighter-rouge">db/</code></h3>
+<p>Contains your database schema as well as db migrations. <code class="highlighter-rouge">schema.rb</code></p>
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Schema</span><span class="p">.</span><span class="nf">define</span><span class="p">(</span><span class="ss">version: </span><span class="mi">0</span><span class="p">)</span> <span class="k">do</span>
+    <span class="n">enable_extension</span> <span class="s2">"plpgsql"</span>
+<span class="k">end</span>
+</code></pre></div></div>
+<h3 id="gemfile-and-gemfilelock">Gemfile and Gemfile.lock</h3>
+
+<p>Used by gem. Allows you to add gem dependencies to you rails application.</p>
+
+<h3 id="lib"><code class="highlighter-rouge">lib/</code></h3>
+<p>Additional modules for your application</p>
+
+<h3 id="log"><code class="highlighter-rouge">log/</code></h3>
+<p>Where application errors are stored.</p>
+
+<h3 id="packagejson"><code class="highlighter-rouge">package.json</code></h3>
+<p>Specifies npm dependecies you rails application needs. For example if you want to use react, angular for your frontend you would specify such in this file.</p>
+
+<h3 id="public"><code class="highlighter-rouge">public/</code></h3>
+<p>Contains static files and compiled assets.</p>
+
+<h3 id="rakefile">Rakefile</h3>
+<p>Locates and loads tasks that can be run from the command line.</p>
+
+<h3 id="readmemd">README.md</h3>
+
+<h3 id="test"><code class="highlighter-rouge">test/</code></h3>
+<p>Unit tests, fixtures, and other test apparatus</p>
+
+<h3 id="tmp"><code class="highlighter-rouge">tmp/</code></h3>
+<p>Temporary files</p>
+
+<h3 id="vendor"><code class="highlighter-rouge">vendor/</code></h3>
+<p>Where third-party code resides.</p>
+
+<h3 id="gitignore"><code class="highlighter-rouge">.gitignore</code></h3>
+<p>what to exclude from your git repo.</p>
+
+<h3 id="ruby-version"><code class="highlighter-rouge">.ruby-version</code></h3>
+<p>contains the default ruby version for your application</p>
+
+<p>Unlike <code class="highlighter-rouge">Flask</code>, Rails comes a lot of inbuilt features. Getting started is just as easy as configuring a few things. <br /> And, you can integrate nodejs into the <code class="highlighter-rouge">frontend</code> and let ruby handle the backend easily. <br /> This is not as easy to do in <code class="highlighter-rouge">Flask</code> or <code class="highlighter-rouge">Django</code>.</p>
+
+<hr />
+
+<h1 id="django">Django</h1>
+
+<p>Like Flask, Django is also python based. But unlike Flask Django does everything a framework does.  It tries to support as many features on all database backends.</p>
+
+<p>Use a database that supports these features;</p>
+
+<ul>
+  <li>Data memory processing,</li>
+  <li>categorization,</li>
+  <li>storage,</li>
+  <li>text standardization,</li>
+  <li>automatic deletion,</li>
+  <li>web or browser and API access,</li>
+  <li>real time transactino processing,</li>
+  <li>good dashborads or visuals.</li>
+</ul>
+
+<p>These are some of the features Django tries to support;</p>
+
+<ul>
+  <li>Encoding</li>
+  <li>Persistent connections</li>
+  <li>Server-side cursors</li>
+  <li>Manually-specifying values of auto-incrementing primary keys</li>
+  <li>Test database templates</li>
+  <li>e.t.c</li>
+</ul>
+
+<p>Django follows the M-V-T (Model-View-Template) architectual pattern which is very similar to the M-V-C pattern followed by ruby and other popular frameworks.</p>
+
+<p>By supporting a large number of database features Django seeks to make the creation of complex database-driven website as easy as possible.</p>
+
+<p>Like rails, there’s an emphasis on reusability of components, less code, and the DRY principle. You can easily build a complex app with less code with Django.</p>
+
+<h2 id="writing-a-simple-django-app">Writing a Simple Django App</h2>
+
+<p>There is a really useful tutorial hosted on the Django website for beginers of Django.</p>
+
+<blockquote>
+  <p><a href="https://docs.djangoproject.com/en/2.2/intro/tutorial01/">Writing your first django app</a></p>
+</blockquote>
+
+<p>But before you can begin I suggest you switch the documentation version (in the lower right corner of the document) to match the version of python you’re running. You should be fine of your version of python &gt; 3.5.</p>
+
+<p>Below is a code listing of the entire process of setting up a django app</p>
+
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">pip install virtualenv</span>
+<span class="s">virtualenv denv &amp;&amp; cd denv</span>
+<span class="s">python -m django --version (2.7 &lt; 1.11 )</span>
+<span class="s">django-admin startproject mysite</span>
+<span class="s">python manage.py runserver</span>
+
+<span class="s">mysite/</span>
+<span class="s">manage.py</span>
+<span class="s">mysite/</span>
+<span class="s">__init__.py</span>
+<span class="s">settings.py</span>
+<span class="s">urls.py</span>
+<span class="s">wsgi.py</span>
+
+<span class="s">manage.py</span><span class="pi">:</span>
+
+<span class="s">mysite/__init__.py</span><span class="pi">:</span>
+<span class="s">mysite/settings.py</span><span class="pi">:</span>
+<span class="s">mysite/urls.py</span><span class="pi">:</span>
+<span class="s">mysite/wsgi.py</span><span class="pi">:</span>
+
+<span class="s">python manage.py startapp yourapp</span>
+</code></pre></div></div>
+
+<hr />
+
+<h1 id="recommendations-for-beginers">Recommendations for beginers</h1>
+
+<h2 id="flask">Flask</h2>
+
+<p>If you are starting out with flask I’d recommend Miguel Grinberg’s tutorial which is free.  He initially wrote a tutorial about building a simple micro-blogging app back in 2014.  Its popularity lead to users supporting him to dedicate his time and knowledge in developing “The New and Improved Flask Mega Tutorial” which he made available online for free!</p>
+
+<p>The tutorial is really well organized and easy to follow and in case you run in to any problems chances are that someone in the comments section has had the same problem and it has probably been answered.
+Miguel runs the site on which the tutorial is hosted and responds pretty fast to comments so check the comment section before running off to google or Stack Overflow.</p>
+
+<p><strong>I highly recommend the following books</strong> – in order;</p>
+
+<blockquote>
+  <ol>
+    <li><a href="https://amzn.to/2PAyc4Q">The New and Improved Flask Mega Tutorial</a> by <strong><em>Miguel Grinberg</em></strong></li>
+    <li><a href="https://amzn.to/2IXmorY"> Flask Framework Cookbook </a> by <strong><em>Shalab A</em></strong></li>
+  </ol>
+</blockquote>
+
+<p>The second book is for <code class="highlighter-rouge">flask</code> programmers who want to go further with <code class="highlighter-rouge">flask</code>.</p>
+
+<h2 id="ruby">Ruby</h2>
+
+<p>For beginners, I would like to recommend;</p>
+<blockquote>
+  <p><a href="https://amzn.to/2DAiSAp">Learn Ruby For Web Development: Learn Rails The Fast and Easy Way</a> <strong><em>by John Elder</em></strong>
+<a href="https://amzn.to/2IJixQ4">The Rails 5</a> - <strong><em>Obie Fernandez</em></strong></p>
+</blockquote>
+
+<h2 id="django-1">Django</h2>
+
+<blockquote>
+  <ol>
+    <li><a href="https://amzn.to/2W3Odm6">Django for Benginners: Build websites with Python and Django</a> by <strong><em>William S Vincent</em></strong></li>
+    <li><a href="https://amzn.to/2XMq6Jk">Test Driven Development with Python</a> by <strong><em>Harry Percival</em></strong></li>
+    <li><a href="https://amzn.to/2Dzpy1v">Django for APIs: Build web API’s with Python and Django</a> by <strong><em>William S Vincent</em></strong></li>
+  </ol>
+</blockquote>
+
+<hr />
+
+<h1 id="final-thoughts">Final thoughts</h1>
+
+<p>By now you should have a pretty decent picture of the benefits of using <code class="highlighter-rouge">flask</code>, <code class="highlighter-rouge">rails</code> and <code class="highlighter-rouge">django</code>.</p>
+
+<p>Some of you may find somethings easier in one framework and others in another.<br /> The goal is to test the limits of each as much as you can, wherever you can. <br /> This will allow you to hit the ground running upon beginning a new project. <br /></p>
+
+<p>Ultimately, the choice of what framework to use will depend on your needs/requirements.<br />
+Do not sacrifice ease of use for <code class="highlighter-rouge">extensibility</code>. Choose wisely.</p>
+
+<p>Lastly, if you spot any grammatical errors or punctuation errors, please point them out in the comment section bellow and as always, happy coding.  :)</p>
+:ET

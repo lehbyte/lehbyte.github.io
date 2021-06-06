@@ -1,0 +1,44 @@
+I"²<p>Bash is one of the most powerful  tools for doing all sorts of things in linux.<br />
+You can automate pretty much anything in bash and bellow are some useful commands. <br />
+Here are snippets of common bash commands I use.</p>
+
+<h3 id="getting-root-permissions-on-a-file-inside-of-vi">Getting root permissions on a file inside of vi</h3>
+
+<p><code class="highlighter-rouge">:w !sudo tee %</code></p>
+
+<p>Choose [L] to reload file as confirmation
+Or simply use <code class="highlighter-rouge">visudo</code></p>
+
+<h3 id="logging-into-mysql-as-root">logging into mysql as root</h3>
+
+<p><code class="highlighter-rouge">mysql -u root -p</code></p>
+
+<h3 id="changing-password">changing password</h3>
+
+<p><code class="highlighter-rouge">mysqladmin -u root -p password newpass</code></p>
+
+<h3 id="secure-installation">secure installation</h3>
+
+<p><code class="highlighter-rouge">mysql_secure_installation</code></p>
+
+<h3 id="change-a-normal-user-password">change a normal user password</h3>
+<p><code class="highlighter-rouge">mysqladmin -u user-name -p password newpass</code></p>
+
+<h3 id="creating-a-new-user">Creating a new user</h3>
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>start mysql as root
+mysql&gt; CREATE USER yourname@localhost<span class="p">;</span>
+GRANT ALL PRIVILEGES ON mydb.<span class="k">*</span> To yourname@localhost IDENTIFIED BY <span class="s1">'yourpassword'</span>
+</code></pre></div></div>
+
+<h3 id="reset-rails-database">Reset rails database</h3>
+
+<p><code class="highlighter-rouge">bin/rake db:reset db:migrate</code></p>
+
+<h3 id="destroy-database-and-create-it-then-migrate-current-schema">destroy database and create it then migrate current schema</h3>
+
+<p><code class="highlighter-rouge">bin/rake db:drop db:create db:migrate</code></p>
+
+<h3 id="duplicate-current-line-in-vscode">Duplicate current line in vscode</h3>
+
+<p><code class="highlighter-rouge">CTRL + SHIFT + NUMPAD2</code></p>
+:ET

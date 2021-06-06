@@ -2,9 +2,9 @@
 layout: post
 title: Effective Communication
 color: '#77216F'
-# feature-img: "assets/img/pexels/raj_desktop.png"
-# thumbnail: "assets/img/pexels/raj_desktop.png"
-# image: "assets/img/pexels/raj_desktop.png"
+feature-img: "assets/img/features/communication2.jpeg"
+thumbnail: "assets/img/features/communication2.jpeg"
+image: "assets/img/features/communication.jpg"
 tags: [communication, programming, speaking, coding]
 author-id: lehbyte
 ---

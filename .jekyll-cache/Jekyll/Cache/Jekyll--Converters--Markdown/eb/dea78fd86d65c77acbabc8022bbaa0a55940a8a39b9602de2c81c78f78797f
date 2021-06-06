@@ -1,0 +1,471 @@
+I"�<p><code class="highlighter-rouge">Flask</code> is one of the best known python micro-frameworks. 
+It is easy to use, light weight, and fast. <br />
+Today we are going to use it to build what will eventually become a restaurant app.</p>
+
+<p>Building a restaurant app is not as easy as it sounds. <br />
+Think of all the things you have to do before ordering food from an online menu;</p>
+
+<ul>
+  <li>Look at different menu items</li>
+  <li>Look at prices for those items</li>
+  <li>Choose between carrWet or delivery</li>
+  <li>Begin a checkout process</li>
+  <li>Enter billing information</li>
+  <li>Get estimate of when meal will be ready</li>
+</ul>
+
+<p>That may be a long list but it’s ideally the type of process the user expectes and is probably accustomed to. These use cases are our requirements. 
+Let’s translate them into design.</p>
+
+<p>Ideally, the user should enjoy browsing different menu items; <br />
+Prices should be prominently displayed, the option to chose between carrWet or delivery should become available once the user has added a menu item onto their food tray.</p>
+
+<p>The checkout process should be secure and the user should receive updates about their meal.</p>
+
+<p>Essentially, we want our app to;</p>
+<ul>
+  <li>Look good (and feel good)</li>
+  <li>Be <code class="highlighter-rouge">responsive</code></li>
+  <li>Fairly fast</li>
+  <li>Most importantly, be <code class="highlighter-rouge">secure</code></li>
+</ul>
+
+<h2 id="design">Design</h2>
+
+<p>Lets break down our app into two different design groups;</p>
+
+<ol>
+  <li><strong>Frontend</strong></li>
+  <li><strong>Backend</strong></li>
+</ol>
+
+<h3 id="frontend-design">Frontend design</h3>
+
+<p>Frontend design is going to be defined by a grid layout where various menu items will be displayed. 
+It will also have; a search bar, and varoius search options for the user which will be  prominently placed at the middle top of the page;</p>
+
+<p>The grid layout will contain a wrapper for all the menu items available for order. <br />
+It is important that menu items display the total time it would take to prepare a food item.<br />
+(<em>We shall see what comprises of a food menu item or food item somewhere down this page</em>).<br />
+When the user begins a checkout process for their food items, count down timers for each of the food items will start and the total time remaining until the food items are ready will be displayed to the user.</p>
+
+<p>So we will need;</p>
+<ol>
+  <li><strong>React</strong></li>
+  <li><strong>Bootstrap</strong> or <strong>Foundation</strong> or <strong>Sass</strong></li>
+  <li><strong>JavaScript</strong></li>
+</ol>
+
+<h3 id="backend-design">Backend design</h3>
+
+<p>We have to consider how the checkout process will playout and what technologies will help us scale properly especially for heavy loads.</p>
+
+<p>There are a number of questions that we have to consider;</p>
+<blockquote>
+  <ol>
+    <li>How are we going to ensure or enforce security. <br />
+<em>We want guest users to browse and checkout without having to register for an account.</em></li>
+    <li>Where do we store the user’s credentials when they sign up for an account?</li>
+    <li>How menu items will be added and deleted from the app itself.</li>
+  </ol>
+</blockquote>
+
+<h4 id="1-how-we-are-going-to-ensure-or-enforce-security">1. How we are going to ensure or enforce security.</h4>
+<p>There are a number of ways we can go about this;</p>
+<ol>
+  <li><em>We can create a guest user account for the user until they checkout, create an account or exit</em></li>
+  <li><em>We can bolster security by using 3rd party authentication services for that guest user</em></li>
+  <li><em>Or we can force the user to sign up for the accounr.</em> - <strong><em>Not good</em>.</strong></li>
+</ol>
+
+<h4 id="2-where-do-we-store-the-users-credentials-when-they-sign-up-for-an-account">2. Where do we store the user’s credentials when they sign up for an account?</h4>
+<ol>
+  <li>Local app database</li>
+  <li>Cloud database, like <strong>S3</strong> or <strong>wasabi</strong></li>
+  <li>Use a 3rd part extension to handle <strong>autnentication</strong>.</li>
+</ol>
+
+<p>Using 3rd part extensions relieves us of some problems but it doesn’t necessarily relieve us of responsibility. If that third-party extension or plugin fails, we will responsible for any damages incurred to the user.</p>
+
+<p>We have to choose third-party extensions wisely. 
+<strong>Do not</strong> sacrifice price for function and - importantly - security. 
+If we feel confident enough to build it then we should do so.</p>
+
+<p>Our final list of bakend tools is as follows;</p>
+<ol>
+  <li><em>PostgresQL database + Amazon storage, S3 for images and user credentials</em></li>
+  <li><em>Foundation + Sass + Javascript with some python for interface to backend</em></li>
+</ol>
+
+<hr />
+
+<h4 id="3-how-menu-items-will-be-added-and-deleted-from-the-app-itself">3. How menu items will be added and deleted from the app itself.</h4>
+
+<p>This is something that is going to be done many times over and it makes no sense to do it programatically. So a secure interface to the backend has to be created to allow the restaurant owners to add and remove images and to modify properties for each menu item as they see fit. 
+Some of these properties include;</p>
+
+<ul>
+  <li><em>Food item preparation time</em></li>
+  <li><em>Food item image</em></li>
+  <li><em>Food item name and description</em></li>
+</ul>
+
+<p>I have described the properties of an object and that is what a food item is, an object.<br />
+Now we shall be mapping many of these objects to a database. 
+To do that we shall need an <code class="highlighter-rouge">ORM</code>. That is, an <code class="highlighter-rouge">Object Relational Mapper</code>.
+Luckily for us there’s <code class="highlighter-rouge">SQLALchemy</code>.</p>
+
+<p>Since we decided to store user credentials, we would have to sanitize them before storing them in the database, this often includes <code class="highlighter-rouge">salting</code> or <code class="highlighter-rouge">encrypting</code> them in some way. <br />
+The <code class="highlighter-rouge">bcrypt</code> package comes to mind while thinking of this but it’s too early to get into details. <br />
+Ultimately, I think an external <code class="highlighter-rouge">package</code> that does this sort of thing - and does it well - would be our best option for handling<code class="highlighter-rouge">authentication</code>. <br />
+However, most <code class="highlighter-rouge">packages</code> or <code class="highlighter-rouge">extenstions</code> that provide <code class="highlighter-rouge">authentication</code> serices are usually too expensive for a simple hobby app like ours so we will implement <code class="highlighter-rouge">authentication</code>. 
+It’s also fun to learn how to do it, correctly.</p>
+
+<h4 id="migrations">Migrations</h4>
+
+<p>Migrations become important when the <code class="highlighter-rouge">schema</code> of our <code class="highlighter-rouge">database</code> changes and we have to update every record in our database without destroying it. Usually when the schema changes, data gets lost. Migrations allow We to retain We data by making non-desctructive changes to the database.</p>
+
+<p>So now we have the backend tools and a fairly decent mental picture of what we need to do;</p>
+<ul>
+  <li><strong>Secure checkout process</strong></li>
+  <li><strong>Implement guest user that can checkout menu items</strong></li>
+  <li><strong>Backend inteerface for addign and modifying existing items</strong></li>
+</ul>
+
+<hr />
+
+<h3 id="going-back-to-the-frontend">Going back to the frontend</h3>
+
+<p>Let us revist that food menu item one more time;</p>
+<ul>
+  <li>Image + image dimensions</li>
+  <li><em>Title/name</em></li>
+  <li><em>Descrition</em></li>
+  <li>Date added</li>
+  <li><em>Preperation time</em></li>
+  <li>Price</li>
+</ul>
+
+<p>Now our food menu item is complete! All that’s left is to define a model with these attributes for <code class="highlighter-rouge">SQLAlchemy</code> to map to our database.
+<code class="highlighter-rouge">SQLAlchemy</code> abstracts away some of the footwork we would traditionally have to do via SQL queries to accomplish the same goals.</p>
+
+<h3 id="things-to-keep-in-mind">Things to keep in mind</h3>
+
+<ol>
+  <li><strong>Responsiveness</strong>; The grid laWet has to accomodate mobile viewports in an elegant way</li>
+  <li>Elegant design (frontend and backend). This usually goes without saying.</li>
+</ol>
+
+<h2><br /></h2>
+
+<h2 id="show-me-the-code">Show Me The <code class="highlighter-rouge">Code</code>!</h2>
+<p>We have talked a lot about what the web app will look like on the <code class="highlighter-rouge">frontend</code> and the <code class="highlighter-rouge">backend</code>. 
+Now we shall start setting up our app in a way that will allow us to build on what is at the foundation.</p>
+
+<h2 id="before-you-begin">Before you begin</h2>
+
+<p>I’m going to be using Ubuntu. If We are not on a Linux-based system, I  suggest using a Linux-based virtual machine or container otherwise We’re going to end up having issues in subsequent tutorials. For this tutorial it’s okay.</p>
+
+<p>If We are on a Linux-based operating system, then Make sure We have the following installed;</p>
+
+<ul>
+  <li><code class="highlighter-rouge">Python</code> (I am using 2.7)</li>
+  <li><code class="highlighter-rouge">virtualenv</code></li>
+  <li><code class="highlighter-rouge">vim/vscode</code> (This is Optional)</li>
+</ul>
+
+<p>Install <code class="highlighter-rouge">python</code> if We do not have it;
+<code class="highlighter-rouge">$ sudo apt-get install python</code></p>
+
+<p>If We have Windows, then just go to the python website to download the latest python installer installer or the one corresponding to 2.7.16</p>
+
+<p>We can also check and  install <code class="highlighter-rouge">pip</code> similarly in case it is not installed. 
+For Windows users We can run the <code class="highlighter-rouge">pip installer executable</code> to install <code class="highlighter-rouge">pip</code> on our system.
+We might also need to edit our system path to include both <code class="highlighter-rouge">python</code> and <code class="highlighter-rouge">pip</code>.</p>
+
+<h3 id="getting-started">Getting started</h3>
+
+<p>Now that we have <code class="highlighter-rouge">python</code> and <code class="highlighter-rouge">pip</code> installed, we shall create a folder for the <code class="highlighter-rouge">app</code>;</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">cd</span> ~/Documents
+<span class="nv">$ </span><span class="nb">mkdir </span>myapp
+<span class="nv">$ </span><span class="nb">cd </span>myapp
+</code></pre></div></div>
+<p>We can call it anything We want, I just ran out of ideas so I stuck with <code class="highlighter-rouge">myapp</code>.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>virtualenv myenv
+<span class="nv">$ </span><span class="nb">source </span>myenv/bin/activate
+</code></pre></div></div>
+<p>The first command will install our virtual environment inside our application folder. Sometimes, this is important. <code class="highlighter-rouge">Python</code> and <code class="highlighter-rouge">pip</code> are some of the things that will be installed in the virtual environment.</p>
+
+<p>That second command will activate our virtual environment. our console will look something like this;</p>
+
+<p><code class="highlighter-rouge">$ (myenv) </code></p>
+
+<p>Once our virtual environment is activated, we shall install the <code class="highlighter-rouge">flask</code> package by running this;</p>
+
+<p><code class="highlighter-rouge">$ (myenv) pip install flask</code></p>
+
+<p>This will allow us  to create our <code class="highlighter-rouge">flask</code> application.
+We can also specify the type of server We want our application to run on
+<code class="highlighter-rouge">$ export FLASK_ENV=development</code>, and the name of the app;
+<code class="highlighter-rouge">$ export FLASK_APP=myapp</code></p>
+
+<h3 id="setting-up-the-app">Setting up the app</h3>
+
+<p>We can just have everything inside one script by creating it;</p>
+
+<p><code class="highlighter-rouge">$ (myenv) vi app.py</code></p>
+
+<p>And adding the following code to it;</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="mf">1.</span> <span class="c1">#!myenv/bin/python
+</span><span class="mf">2.</span> <span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span>
+<span class="mf">3.</span>
+<span class="mf">4.</span> <span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+<span class="mf">5.</span> 
+<span class="mf">6.</span> <span class="o">@</span><span class="n">app</span><span class="p">.</span><span class="n">route</span><span class="p">(</span><span class="s">"/"</span><span class="p">)</span>
+<span class="mf">7.</span> <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+<span class="mf">8.</span>     <span class="k">return</span> <span class="s">"Welcome to my flask application."</span>
+<span class="mf">9.</span> 
+<span class="mf">10.</span> <span class="n">app</span><span class="p">.</span><span class="n">run</span><span class="p">(</span><span class="s">"127.0.0.1"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>We can then make the script accessible and executable by running the following command:
+<code class="highlighter-rouge">$ chmod a+x app.py</code>
+And run it; <code class="highlighter-rouge">$ ./app.py</code>
+Navigate to <code class="highlighter-rouge">127.0.0.1:5000</code> or <code class="highlighter-rouge">localhost:5000</code> in our browser.
+We should expect to see a page displaying the words Welcome to my flask application congratulations.</p>
+
+<p>I will now describe what each line of code in our <code class="highlighter-rouge">app.py</code> script does before breaking things up.
+The lines are; <code class="highlighter-rouge">1, 2, 4, 6, 7, 10</code></p>
+
+<h3 id="line-1-myenvbinpython">Line 1. #!myenv/bin/python</h3>
+
+<p>The first line tells bash to execute our script using the instance of python installed in our virtual environment. We can use one virtual environment for multiple flask apps so it’s not necessary and is quite wasteful to have a virtual environment for every flask app We have (in my opinion).  So if We want to build two  or more flask applications using one virtual machine then it would have to reside one level above those flask applications.</p>
+
+<p>For example;</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">/</span><span class="n">fenv</span>
+<span class="o">----</span><span class="n">myapp</span><span class="o">/</span>
+<span class="o">--------</span> <span class="n">app</span><span class="p">.</span><span class="n">py</span>
+<span class="o">----</span><span class="n">myapp2</span><span class="o">/</span>
+<span class="o">--------</span> <span class="n">app</span><span class="p">.</span><span class="n">py</span>
+<span class="o">----</span><span class="n">myapp3</span><span class="o">/</span>
+<span class="o">--------</span> <span class="n">app</span><span class="p">.</span><span class="n">py</span>
+</code></pre></div></div>
+
+<p>We can then specify on the first line of each app.py script above:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!myenv/bin/python</span>
+<span class="nv">$ </span><span class="nb">cd</span> ../
+</code></pre></div></div>
+
+<p>then create a new virtual environment,
+<code class="highlighter-rouge">$ virtualenv fenv</code>
+then quickly go back to our flask app, activate it and install flask;</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="nb">source</span> ./myenv/bin/activate
+<span class="nv">$ </span><span class="o">(</span>fenv<span class="o">)</span> pip <span class="nb">install </span>flask
+</code></pre></div></div>
+<p>Don’t forget to change line 1 of our script so that it says;
+<code class="highlighter-rouge"><span class="c1">#!myenv/bin/python</span></code></p>
+
+<h3 id="line-2-from-flask-import-flask">Line 2. from flask import Flask</h3>
+
+<p>Line 2 in our app.py  imports a Flask object from the flask module.
+flask and Flask are two separate things.
+flask as I’ve said is a module.</p>
+
+<p>Flask is an <strong>object</strong> that implements a <strong>WSGI</strong> application and acts as the central object. It accepts the name of the module or  the package of the application. Once it is created it will act as a central registry for the view functions, the URL rules, template configuration and so on.</p>
+
+<p>I wont get into what a <strong>WSGI</strong> application is, We can read more about that on Wikipedia if We want but I will say that Flask is based on <code class="highlighter-rouge">Jinja2</code> and <code class="highlighter-rouge">Werkzeug</code> which is a comprehensive library of tools for <strong>WSGI</strong> applications.</p>
+
+<h3 id="line-4-raj--flaskname">Line 4. Raj = Flask(<strong>name</strong>)</h3>
+
+<p>The <code class="highlighter-rouge">Flask</code> object is what we use to create our app on <code class="highlighter-rouge">line 4</code>.</p>
+
+<p><code class="highlighter-rouge">4. Raj = Flask(__name__)</code></p>
+
+<p>The <strong>name</strong> that We see refers to the name of the module, in this case flask.
+We can also call our app anything, calling it app just makes things easier but We can do this;</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="mf">1.</span> <span class="c1">#!myenv/bin/python
+</span><span class="mf">2.</span> <span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span>
+<span class="mf">3.</span> 
+<span class="mf">4.</span> <span class="n">Raj</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+<span class="mf">5.</span>
+<span class="mf">6.</span> <span class="o">@</span><span class="n">Raj</span><span class="p">.</span><span class="n">route</span><span class="p">(</span><span class="s">"/"</span><span class="p">)</span>
+<span class="mf">7.</span> <span class="k">def</span> <span class="nf">page_one</span><span class="p">():</span>
+<span class="mf">8.</span>    <span class="k">return</span> <span class="s">"Welcome to Raj's flask application."</span>
+<span class="mf">9.</span>
+<span class="mf">10.</span> <span class="n">Raj</span><span class="p">.</span><span class="n">run</span><span class="p">(</span><span class="s">"127.0.0.1"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Go ahead and try it out. <code class="highlighter-rouge">$ (fenv) ./app.py</code></p>
+
+<h3 id="line-6-approute-or-rajroute">Line 6. @app.route(“/”) or @Raj.route(“/”)</h3>
+
+<p>Line 6 is what is known as a decorator. A decorator is essential a method that is able to “alter” the way a function behaves without having to change the source code of the function.  If We already know what a decorator does then We can skip the code but here’s a brief example.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;&gt;&gt;</span> <span class="k">def</span> <span class="nf">D</span><span class="p">(</span><span class="n">func</span><span class="p">):</span> <span class="c1"># a decorator for A function 
+</span><span class="o">&gt;&gt;&gt;</span>     <span class="k">print</span><span class="p">(</span><span class="s">"Function has been decorated!"</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span>     <span class="k">return</span> <span class="n">func</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="o">@</span><span class="n">D</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">def</span> <span class="nf">A</span><span class="p">():</span>
+<span class="o">&gt;&gt;&gt;</span>     <span class="k">print</span><span class="p">(</span><span class="s">"I am A."</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="s">"Function has been decorated!"</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">D</span><span class="p">(</span><span class="n">A</span><span class="p">())</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="s">"I am A"</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="s">"Function has been decorated!"</span>
+</code></pre></div></div>
+
+<p>So our app’s route method decorates our <code class="highlighter-rouge">page_one()</code> function in line 7.  Raj.route takes in a URL rule, in this case “/”, and registers the view function – <code class="highlighter-rouge">page_one()</code>, for that URL rule – “/”.</p>
+
+<p>In addition to the URL rule, we can also specify options such as;</p>
+
+<p><code class="highlighter-rouge">Raj.route("/", methods=["GET"])</code></p>
+
+<p>We didn’t have to specify that method because it’s the default method.</p>
+
+<h3 id="line-7-def-index-or-page_one">Line 7. def index(): or page_one():</h3>
+<p>This is just a view function which returns the string “Welcome to Raj’s flask application.” It’s registered to the URL rule we specify in our app’s route decorator. We can also pass objects and strings to this function for example</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">page_one</span><span class="p">(</span><span class="n">global_string</span><span class="p">):</span>
+    <span class="k">print</span> <span class="n">global_string</span>
+
+<span class="c1"># or an object
+</span><span class="k">def</span> <span class="nf">page_one</span><span class="p">(</span><span class="n">some_object</span><span class="p">):</span>
+    <span class="k">print</span> <span class="n">some_object</span><span class="p">.</span><span class="n">get_message</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>And so on. Of course We would have to define global_string and some_object</p>
+
+<h3 id="line-10-apprun127001-or-rajrun127001">Line 10. app.run(“127.0.0.1”) or Raj.run(“127.0.0.1”)</h3>
+
+<p>Raj.run(“127.0.0.1”) essentially runs our flask application on a local development server at the localhost which is an alias the ip address 127.0.0.1</p>
+
+<p>Now this method can take in the host, port, debug option, and other variables. We only specified the host in our case. By default, the app runs on port 5000 and debugging is disabled.
+So to run our app on a different port with debugging enabled we would have to specify it thus;</p>
+
+<p><code class="highlighter-rouge">Raj.run("localhost", port=8000, debug=True)</code></p>
+
+<p>The production environment is what runs by default. We would have to specify our option in a <code class="highlighter-rouge">FLASK_ENV</code> variable.</p>
+
+<p>To specify a development environment for our application run;
+<code class="highlighter-rouge">$ export FLASK_ENV=development</code></p>
+
+<p>Then we can either do;</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">$</span> <span class="n">flask</span> <span class="n">run</span> <span class="ow">or</span>
+<span class="err">$</span> <span class="p">.</span><span class="o">/</span><span class="n">run</span><span class="p">.</span><span class="n">py</span>
+</code></pre></div></div>
+<p><br /></p>
+
+<hr />
+
+<h3 id="full-code-listing">Full code listing.</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#!myenv/bin/python
+</span><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span>
+
+<span class="n">Raj</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<span class="o">@</span><span class="n">Raj</span><span class="p">.</span><span class="n">route</span><span class="p">(</span><span class="s">"/"</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s">"GET"</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">(</span><span class="s">"Welcome to Raj's flask application."</span><span class="p">)</span>
+
+<span class="n">Raj</span><span class="p">.</span><span class="n">run</span><span class="p">(</span><span class="s">"localhost"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8000</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="breaking-things-up">Breaking things up</h2>
+
+<p>All that is well and good but it’s gonna make it very cumbersome for us to develop our app because seperating business logic from app logic will become increasingly harder during development. So we will have to seperate our <code class="highlighter-rouge">views</code> from our <code class="highlighter-rouge">models</code> and <code class="highlighter-rouge">controllers</code>. We’ve got not <code class="highlighter-rouge">models</code> - yet but we will be following the <code class="highlighter-rouge">M-V-C</code> architectural pattern.</p>
+
+<p>Right now we shouldn’t be worried because we have one view;</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">@</span><span class="n">Raj</span><span class="p">.</span><span class="n">route</span><span class="p">(</span><span class="s">"/"</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s">"GET"</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">(</span><span class="s">"Welcome to Raj's flask application."</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>So lets break up in accordance with the <code class="highlighter-rouge">M-V-C</code> pattern. 
+Ideally we will want the structure of our app to be thus;</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>├── app
+│   ├── __init__.py
+│   ├── __init__.pyc
+│   ├── static
+│   │   └── style.css
+│   ├── templates
+│   │   └── index.html
+│   ├── views.py
+│   └── views.pyc
+└── run.py
+</code></pre></div></div>
+<hr />
+
+<p><br /></p>
+
+<h3 id="app"><code class="highlighter-rouge">app/</code></h3>
+<p>This is the folder that will house everything about our app. 
+It contains;</p>
+<ul>
+  <li>An initialization script <code class="highlighter-rouge">__init__.py</code></li>
+  <li>A <code class="highlighter-rouge">static/</code> directory for our <code class="highlighter-rouge">CSS</code></li>
+  <li>A <code class="highlighter-rouge">templates/</code> directory for our <code class="highlighter-rouge">HTML</code> templates.</li>
+  <li><code class="highlighter-rouge">views.py</code></li>
+</ul>
+
+<h3 id="__init__py"><code class="highlighter-rouge">__init__.py</code></h3>
+<p>In python the <code class="highlighter-rouge">__init__</code> keyword is what represents a constructor and in this case represents our <code class="highlighter-rouge">app</code> if you think of it as a package. 
+In fact, the first step to making a python package is to have a script defined that way.
+Here are the contents of our <code class="highlighter-rouge">__init__.py</code> file;</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span>
+<span class="n">Raj</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span> 
+<span class="kn">from</span> <span class="nn">app</span> <span class="kn">import</span> <span class="n">views</span>
+</code></pre></div></div>
+
+<h3 id="static"><code class="highlighter-rouge">static/</code></h3>
+<p>The <code class="highlighter-rouge">static/</code> directory houses all our <code class="highlighter-rouge">css</code> stylesheets. 
+Right now we’ve got no stylesheet but that will change in the second tutorial.</p>
+
+<h3 id="templates"><code class="highlighter-rouge">templates/</code></h3>
+<p>The <code class="highlighter-rouge">templates/</code> directory houses our <code class="highlighter-rouge">html</code> files, but they are considered templates because we can pass <code class="highlighter-rouge">python</code> objects to them.</p>
+
+<h3 id="viewspy"><code class="highlighter-rouge">views.py</code></h3>
+<p><code class="highlighter-rouge">views.py</code> file contains all our views, in this case;</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">@</span><span class="n">Raj</span><span class="p">.</span><span class="n">route</span><span class="p">(</span><span class="s">"/"</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s">"GET"</span><span class="p">])</span>
+<span class="o">@</span><span class="n">Raj</span><span class="p">.</span><span class="n">route</span><span class="p">(</span><span class="s">"/index"</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s">"GET"</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">(</span><span class="s">"Welcome to Raj's flask application."</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="runpy"><code class="highlighter-rouge">run.py</code></h3>
+<p>Finally, our <code class="highlighter-rouge">run.py</code> script is what will allow us to run our app.</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#!myenv/bin/python
+</span><span class="kn">from</span> <span class="nn">app</span> <span class="kn">import</span> <span class="n">Raj</span>
+<span class="n">Raj</span><span class="p">.</span><span class="n">run</span><span class="p">(</span><span class="s">"localhost"</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">3000</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+<p>This compartmentalized form of our app allows us to work on our app efficiently.</p>
+
+<h2 id="conclusion-to-part-1">Conclusion to part 1</h2>
+<p>We have barely started. There’s still a lot more work to do on the <code class="highlighter-rouge">frontend</code> and the <code class="highlighter-rouge">backend</code>
+but at least we have created a foundation from which to actually begin working on the <code class="highlighter-rouge">frontend</code></p>
+
+<p>We will start with the <code class="highlighter-rouge">frontend</code> until we have met all the goals on that front :).</p>
+
+<p>Some developers prefer starting with the <code class="highlighter-rouge">backend</code> and work their way towards the <code class="highlighter-rouge">front</code> but in my opinion it makes it easier to learn when we start from the <code class="highlighter-rouge">frontend</code> because it’s the least <code class="highlighter-rouge">problematic</code> fronts to deal with. It is really a matter of taste and perhaps project complexity, for example simple <code class="highlighter-rouge">backend</code> vs simple <code class="highlighter-rouge">frontend</code>.</p>
+
+<p>It actually might make more sense for us to lay down some basic database connections and admin views so that we have <code class="highlighter-rouge">items</code> to add and delete. The model doesn’t have to be complicated.
+This is actually the easy part of <code class="highlighter-rouge">backend</code> work, at least as far as the basics go. 
+It’s a good place to start in the next part of this series.</p>
+
+<p>In addition to the database connections and an <code class="highlighter-rouge">admin</code> interface to that database we shall also create the basic layout of our restaurant;</p>
+
+<ul>
+  <li><code class="highlighter-rouge">css</code> stylesheets + <code class="highlighter-rouge">sass</code> plugin</li>
+  <li><code class="highlighter-rouge">HTML</code> templates complete with sample images</li>
+</ul>
+:ET

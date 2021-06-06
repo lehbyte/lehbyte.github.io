@@ -1,0 +1,2 @@
+I"Y<p>Suppose you want to install an npm package globally  as in npm install -g git-pending but for whatever reason encounter a permissions problem, EACCESS for example. One of the things you could do to fix that is by running the npm command with sudo privileges, as in; <code class="highlighter-rouge">sudo npm install -g git-pending.</code></p>
+:ET

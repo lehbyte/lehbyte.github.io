@@ -1,0 +1,102 @@
+I"<h2 id="the-problem-getting-an-xpcom-error-after-upgrading-waterfox">The problem: Getting an XPCOM error after upgrading Waterfox.</h2>
+<p>I recently upgraded my <code class="highlighter-rouge">Waterfox</code> version. I first had to close down all running instances of Waterfox, and delete it from 
+<code class="highlighter-rouge">/usr/lib/</code>. I then downloaded the classic version of it and extracted it to my <code class="highlighter-rouge">/usr/lib/</code> directory and hoped that everything would work fine but I was wrong. For some reason <code class="highlighter-rouge">Waterfox</code> would not launch when I clicked the icon so I popped open a terminal and navigated to <code class="highlighter-rouge">/usr/lib/waterfox-classic</code> to run <code class="highlighter-rouge">waterfox</code>. 
+Thats when I got the error: <code class="highlighter-rouge">can not load XPCOM.</code></p>
+
+<p>So I searched around and it seemed like a lot of waterfox users were having the same issue;</p>
+
+<p><img src="/assets/img/waterfox/on-windows.png" alt="OnWindows" /></p>
+
+<p>There’s still an open issue on <code class="highlighter-rouge">github</code> about this;</p>
+
+<p><img src="/assets/img/waterfox/github-screenshot.png" alt="github" /></p>
+
+<p><br /></p>
+
+<h2 id="things-i-tried-at-first---download-and-installing-a-fresh-copy-of-waterfox">Things I tried at first - Download and installing a fresh copy of waterfox</h2>
+<p>I actually popped open a terminal and ran; <br />
+<code class="highlighter-rouge">$ gdb waterfox</code> <br />
+This was very helpful because it allowed me pinpoint more or less where the problem was coming from. <br /> 
+You might want to start there in case this turns out not work for you. <br />
+Anyway, the results indicated that there was something wrong with <code class="highlighter-rouge">/usr/bin/waterfox</code>. 
+What came to my mind was, this is most likely a linking issue.</p>
+
+<p>So the first thing I did was to completely remove waterfox from my system. 
+Fortunately I could do this because I had disabled remembering history on waterfox.</p>
+
+<p><code class="highlighter-rouge">$ sudo apt-get purge --autoremove wafterfox</code></p>
+
+<p>I then made sure that there were no hanging references to waterfox by running the following command;</p>
+
+<p><code class="highlighter-rouge">$ whereis waterfox</code></p>
+
+<p>And removed <code class="highlighter-rouge">/usr/bin/waterfox</code>.</p>
+
+<p>Then it was on to downloading and installing <code class="highlighter-rouge">waterfox</code>.</p>
+
+<h2 id="step-1-download-waterfox">Step 1: Download Waterfox</h2>
+<p>There are two versions of <code class="highlighter-rouge">waterfox</code> listed on their main website.</p>
+
+<ol>
+  <li>Third generation <code class="highlighter-rouge">Waterfox</code>; includes latest in web tech from mozilla contributions.</li>
+  <li>Waterfox classic; for those who just want a basic version of <code class="highlighter-rouge">Waterfox</code></li>
+</ol>
+
+<p>I went with the classic version of <code class="highlighter-rouge">Waterfox</code>;</p>
+
+<p><img src="/assets/img/waterfox/waterfox.png" alt="classic" />
+<img src="/assets/img/waterfox/waterfox-download.png" alt="downloading" />
+<img src="/assets/img/waterfox/waterfox-downloaded.png" alt="downloaded" /></p>
+
+<p><br /></p>
+
+<h2 id="step-2-extract-it-to-usrlib">Step 2: Extract it to /usr/lib/</h2>
+
+<p><code class="highlighter-rouge">/usr/lib</code> is a directory exclusive to root users so don’t forget to prepend your command with sudo.</p>
+
+<p>As the screenshot shows I extracted the contents of the archive to <code class="highlighter-rouge">/usr/lib/</code></p>
+
+<p><img src="/assets/img/waterfox/terminal-extract.png" alt="Extration" /></p>
+
+<p>Navigate there;</p>
+
+<p><img src="/assets/img/waterfox/navigate-waterfox-lib.png" alt="Navigate" /></p>
+
+<p>Here are the contents;</p>
+
+<p><img src="/assets/img/waterfox/waterfox-exe.png" alt="contents" /></p>
+
+<h2 id="step-3-create-a-symbolic-link-in-usrbin">Step 3: Create a symbolic link in /usr/bin/</h2>
+
+<p>Create a symbolic link in <code class="highlighter-rouge">/usr/bin</code> that points to the <code class="highlighter-rouge">waterfox</code> executable highlighted in the image above.</p>
+
+<p><img src="/assets/img/waterfox/creating-symbolic-link.png" alt="symbolink" /></p>
+
+<p>Now you can actually be in any directory and launch waterfox by simply typing <code class="highlighter-rouge">$ waterfox</code> but 
+it becomes inconvenient to do that all the time so the next thing to do would be to create an icon for <code class="highlighter-rouge">waterfox</code>.</p>
+
+<h2 id="step-4-create-a-desktop-entry-for-waterfox">Step 4: Create a desktop entry for Waterfox</h2>
+
+<p>Navigate to <code class="highlighter-rouge">/usr/share/applications</code> to create an entry for waterfox.
+If you’re installing waterfox for the first time then you most likely will not have that icon.</p>
+
+<p>Since I had vivaldi, there was already an entry for <code class="highlighter-rouge">vivaldi-stable.desktop</code>. 
+I basically just copied and remaned it to <code class="highlighter-rouge">waterfox.desktop</code>;</p>
+
+<p><code class="highlighter-rouge">$ cp vivaldi-stable.desktop waterfox.desktop</code></p>
+
+<p>I then changed the contents and made sure that the <code class="highlighter-rouge">Icon</code> and <code class="highlighter-rouge">Exec</code> variables/tags were assigned to the 
+correct locations.</p>
+
+<p><img src="/assets/img/waterfox/gedit-waterfox-desktop.png" alt="waterfox-icon-entry" /></p>
+
+<h2 id="step-5-test">Step 5: Test</h2>
+
+<p>Finally search for Waterfox in the dashboard and launch it;</p>
+
+<p><img src="/assets/img/waterfox/icon-search.png" alt="waterfox-dashboard" /></p>
+
+<p>Here is <code class="highlighter-rouge">Waterfox</code> launched.</p>
+
+<p><img src="/assets/img/waterfox/waterfox-launched.png" alt="waterfox-launched" /></p>
+:ET

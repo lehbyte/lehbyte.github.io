@@ -2,8 +2,8 @@
 layout: post
 title: Can not load XPCOM when launching Waterfox
 color: 'indigo'
-# feature-img: "assets/img/pexels/raj_desktop.png"
-# thumbnail: "assets/img/pexels/raj_desktop.png"
+feature-img: "assets/img/features/waterfoxlogo.png"
+thumbnail: "assets/img/features/waterfoxlogo.png"
 # image: "assets/img/pexels/raj_desktop.png"
 tags: [waterfox, XPCOM, error, correct ,installation]
 author-id: lehbyte

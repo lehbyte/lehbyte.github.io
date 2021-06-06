@@ -1,0 +1,109 @@
+I"U,<p>If you go to <a href="https://gulpjs.com">gulpjs.com</a> you will be greeted with the following banner;</p>
+<blockquote>
+  <p>Automate and enhance your workflow</p>
+</blockquote>
+
+<p>I would like to add just one word in that banner; <code class="highlighter-rouge">frontend</code> because that is what it does best.</p>
+
+<p>More concisely, gulp is a frontend build system;</p>
+<blockquote>
+  <p>It is a task runner built on Nodejs and npm used for automation of time-consuming and repetitiev tasks involved in web development line minification, concatenation , cache busting, unit testing, linting, optiization, etc. 
+<!--more--></p>
+</blockquote>
+
+<p>I recently made an <code class="highlighter-rouge">expressjs</code> app and was looking for a way to simplify compiling to css, watching my files and serving them so I searched around for a <code class="highlighter-rouge">plugin</code> that would help me with these tasks.</p>
+
+<p>Now I was little bit familiar with <code class="highlighter-rouge">Grunt</code> but found it cumbersome and some of it’s facilities weird so I looked around for a suitable alternative. 
+I discovered a lot of developers praising <code class="highlighter-rouge">gulpjs</code> for it’s ease of use. 
+Moreover, many were hailing it as a potential replacement of <code class="highlighter-rouge">Grunt</code>.</p>
+
+<p>Consequently, I looked up some examples and tried to copy and paste, not because I was a crappy programmer who couldn’t be botherd to learn the proper way of using a tool/technology, but because I wanted to gauge <code class="highlighter-rouge">gulpjs</code>’s ease of use, especially among first users like me.</p>
+
+<p>Needless to say, I was a litte disappointed. I had expected the problem to be easily fixable because I had brought into the narrative that <code class="highlighter-rouge">gulpjs</code> was essentially a plug and play plugin.
+But most of the dated comments and <code class="highlighter-rouge">stackoverflow</code> answers were specific to <code class="highlighter-rouge">gulpjs 3.0</code>, therein was the problem.</p>
+
+<p>So I did what any responsible programmer would do, I took off my know-it-all hat, and started googling around for information specific to  <code class="highlighter-rouge">gulp 4.0</code>. 
+However, all I could find about that and about <code class="highlighter-rouge">gulpjs - expressjs</code> integration  was outdated information. Most tutorials only worked for <code class="highlighter-rouge">gulpjs 3.0</code> and not <code class="highlighter-rouge">gulp 4.0</code>. It looked like I was stuck with this problem.</p>
+
+<p>I tried a couple of hacks which hardly got me anywhere. 
+Finally, I gave up :( and went to <code class="highlighter-rouge">gulpjs.com</code> for some quick solution, 
+Much to my surprise, the site was sprinkled with snippets of code, I wondered why I hadn’t visited the website first. Then I began integrating <code class="highlighter-rouge">gulpjs 4.0</code> into my <code class="highlighter-rouge">expressjs 4.0</code> app,</p>
+
+<p>Unfortunately, nothing worked. So much for those code <code class="highlighter-rouge">snippets</code>. 
+I had to accept that I really didn’t understand how gulp worked.
+This humbled me enought to tackle the API and boy is that documentation all over the place. 
+Anyway, I finally managed to make <code class="highlighter-rouge">Gulpjs</code> and <code class="highlighter-rouge">Expressjs</code> work together seamlessly which brings me to the point of this article;</p>
+
+<blockquote>
+  <p>If you don’t feel like going through those pages, this article is for you.</p>
+</blockquote>
+
+<h2 id="what-is-missing">What is missing?</h2>
+
+<p>This was my gulp file.</p>
+
+<figure class="highlight"><pre><code class="language-js" data-lang="js"><span class="kd">const</span> <span class="p">{</span> <span class="nx">src</span><span class="p">,</span> <span class="nx">series</span><span class="p">,</span> <span class="nx">paralell</span><span class="p">,</span> <span class="nx">dest</span><span class="p">,</span> <span class="nx">watch</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">"</span><span class="s2">gulp</span><span class="dl">"</span><span class="p">);</span>
+<span class="kd">const</span> <span class="nx">sass</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">gulp-sass</span><span class="dl">'</span><span class="p">);</span>
+<span class="kd">const</span> <span class="nx">plumber</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">gulp-plumber</span><span class="dl">'</span><span class="p">);</span>
+<span class="kd">const</span> <span class="nx">cleanCSS</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">gulp-clean-css</span><span class="dl">'</span><span class="p">);</span>
+<span class="kd">const</span> <span class="nx">browserSync</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">"</span><span class="s2">browser-sync</span><span class="dl">"</span><span class="p">);</span>
+
+<span class="c1">//transpile</span>
+<span class="kd">function</span> <span class="nx">transpile</span><span class="p">(){</span>
+    <span class="k">return</span> <span class="nx">src</span><span class="p">(</span> <span class="dl">'</span><span class="s1">assets/sass/*.scss</span><span class="dl">'</span> <span class="p">)</span>
+        <span class="p">.</span><span class="nx">pipe</span><span class="p">(</span><span class="nx">plumber</span><span class="p">()</span>
+        <span class="p">.</span><span class="nx">pipe</span><span class="p">(</span><span class="nx">sass</span><span class="p">())</span>
+        <span class="p">.</span><span class="nx">pipe</span><span class="p">(</span><span class="nx">cleanCSS</span><span class="p">())</span>
+        <span class="p">.</span><span class="nx">pipe</span><span class="p">(</span><span class="nx">dest</span><span class="p">(</span> <span class="dl">'</span><span class="s1">assets/css/</span><span class="dl">'</span> <span class="p">))</span>
+        <span class="p">.</span><span class="nx">pipe</span><span class="p">(</span><span class="nx">browserSync</span><span class="p">.</span><span class="nx">reload</span><span class="p">(</span> <span class="nx">stream</span> <span class="p">));</span>
+<span class="p">}</span>
+
+<span class="kd">function</span> <span class="nx">bwsync</span><span class="p">(</span><span class="nx">cb</span><span class="p">){</span>
+    <span class="nx">browserSync</span><span class="p">.</span><span class="nx">init</span><span class="p">({</span>
+        <span class="na">proxy</span><span class="p">:</span> <span class="dl">"</span><span class="s2">localhost:3000</span><span class="dl">"</span><span class="p">,</span>
+        <span class="na">port</span><span class="p">:</span> <span class="dl">"</span><span class="s2">5000</span><span class="dl">"</span>
+    <span class="p">}</span> <span class="nx">cb</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kd">function</span> <span class="nx">watchCss</span><span class="p">(</span><span class="nx">cb</span><span class="p">){</span>
+    <span class="nx">watch</span><span class="p">(</span> <span class="dl">'</span><span class="s1">assets/sass/*.scss</span><span class="dl">'</span><span class="p">,</span> <span class="nx">transpile</span> <span class="p">);</span>
+    <span class="nx">cb</span><span class="p">();</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>Lets take a look at the default task;</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span><span class="p">.</span><span class="k">default</span> <span class="o">=</span> <span class="nx">parallel</span><span class="p">(</span><span class="nx">series</span><span class="p">(</span><span class="nx">transpile</span><span class="p">,</span> <span class="nx">watchCss</span><span class="p">)</span> <span class="nx">bsync</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>So what is missing here?</p>
+
+<p><strong><em>A <code class="highlighter-rouge">server</code>. Yep.</em></strong></p>
+
+<p>Contrary to what you might think, <code class="highlighter-rouge">browserSync</code> does not lauch your express app, you have to launch it your self for <code class="highlighter-rouge">browserSync</code> to proxy it or you can specify an <code class="highlighter-rouge">index.html</code> (or just <code class="highlighter-rouge">html</code>) file directory otherwise <code class="highlighter-rouge">browserSync</code> will be stuck in a loop trying to look for a server, <code class="highlighter-rouge">localhost:3000</code> for example, to proxy when said <code class="highlighter-rouge">server</code> is actually not running.</p>
+
+<h2 id="nodemon-to-the-rescue">Nodemon to the rescue</h2>
+
+<p>Ok, so let’s write a function to launch our server so that we can call it before the browser sync task.</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">nodemon</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">gulp-nodemon</span><span class="dl">'</span><span class="p">);</span>
+
+<span class="kd">function</span> <span class="nx">serve</span><span class="p">(</span><span class="nx">cb</span><span class="p">){</span>
+    <span class="kd">let</span> <span class="nx">started</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+    <span class="k">return</span> <span class="nx">nodemon</span><span class="p">({</span>
+            <span class="na">script</span><span class="p">:</span> <span class="dl">'</span><span class="s1">bin/www</span><span class="dl">'</span>
+    <span class="p">}).</span><span class="nx">on</span><span class="p">(</span><span class="dl">'</span><span class="s1">start</span><span class="dl">'</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
+         <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">started</span><span class="p">){</span>
+             <span class="nx">cb</span><span class="p">();</span>
+             <span class="nx">started</span> <span class="o">=</span> <span class="nx">truel</span>
+          <span class="p">}</span>
+     <span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Now let us modify our exports to reflect these changes;</p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="nx">parallel</span><span class="p">(</span> <span class="nx">series</span><span class="p">(</span><span class="nx">transpile</span><span class="p">,</span> <span class="nx">watchCss</span><span class="p">,</span> <span class="nx">serve</span><span class="p">),</span> <span class="nx">bsync</span> <span class="p">);</span>
+</code></pre></div></div>
+
+<p>Happy coding. 🙂</p>
+:ET

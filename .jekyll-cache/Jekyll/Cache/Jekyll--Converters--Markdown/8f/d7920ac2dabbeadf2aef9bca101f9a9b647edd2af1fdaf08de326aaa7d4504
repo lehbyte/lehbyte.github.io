@@ -1,0 +1,13 @@
+I"y<h2 id="a-restaurant-app">A restaurant app</h2>
+
+<p>I was inspirired to do this project when I first started learning flask. 
+I have the basic stuff working; I can fetch food items and their corresponding images from the app’s database.</p>
+
+<h2 id="why-raj">Why Raj</h2>
+
+<p>I am open to suggestions. 
+Ideas for a coupons page and a blog are also plausible. 
+I thought I could use the app’s database for blog articles as well but worried it would be doing too much.</p>
+
+<p>It doesn’t hurt to try though. It would also be fun experienting with another framwework, possibly nodejs, with regards to building a working blog.</p>
+:ET

@@ -1,0 +1,157 @@
+I"=<p>Deploying your flask application on an apache server might seem daunting at first but it’s not that bad – if you follow these 4-5 easy steps.</p>
+
+<h2 id="assumptionstips">Assumptions/Tips</h2>
+
+<p>I’m assuming your server is linux-based (Ubuntu 16.04/14.04 e.t.c)
+If you are ssh-ing into your server from your machine make sure to use a vpn to test if your site is up or consider closing the ssh session if you want to test out your website from your host. I recommend using Opera for this as you could simply open an incognito window with the vpn option enabled and test your website without having to close your ssh session.</p>
+
+<p><img src="/assets/img/pexels/opera1.jpg" alt="Opera vpn" /></p>
+
+<h2 id="setup">Setup</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>MyApp
+   /app
+      /static
+      /template
+      /venv
+      __init__.py
+      views.py
+      models.py
+myapp.wsgi
+__init__.py
+</code></pre></div></div>
+
+<p>Install <code class="highlighter-rouge">apache2</code> and <code class="highlighter-rouge">mod_wsgi</code> is you don’t already have those installed.
+<code class="highlighter-rouge">sudo apt-get install apache2</code>
+<code class="highlighter-rouge">sudo apt-get install libapache2-mod-wsgi</code></p>
+
+<p>Using python3?
+<code class="highlighter-rouge">sudo apt-get install libapache2-mod-wsgi-py</code></p>
+
+<h2 id="step-0">Step 0</h2>
+<p>Make sure that your <code class="highlighter-rouge">localhost</code> is set up correctly.
+Make sure that <code class="highlighter-rouge">127.0.0.0.1</code> localhost <code class="highlighter-rouge">mydomain.com</code> <code class="highlighter-rouge">http://www.mydomain.com</code>
+Or something like that.</p>
+
+<h2 id="step-1">Step 1</h2>
+<p>After Installing <code class="highlighter-rouge">apache2</code> and <code class="highlighter-rouge">mod_wsgi</code> go to <code class="highlighter-rouge">/etc/apache2/sites-enabled/</code>
+and make sure that <code class="highlighter-rouge">000-default.conf</code> is enabled and that <code class="highlighter-rouge">apache2</code> is running.
+To check if <code class="highlighter-rouge">apache2</code> is up, run the following command, <code class="highlighter-rouge">sudo service apache2 status</code>
+If <code class="highlighter-rouge">apache2</code> is running you will see a green dot at the start of the status message.</p>
+
+<p>If apache2 is not running run  <code class="highlighter-rouge">sudo service apache2 start</code> and enable <code class="highlighter-rouge">000-default.conf</code> if it is not enabled. 
+In <code class="highlighter-rouge">/etc/apache2/sites-enabled/</code> run the following command; <code class="highlighter-rouge">sudo a2ensite 000-default.conf</code> then, restart apache2 server; <code class="highlighter-rouge">sudo service apache2 restart</code>.</p>
+
+<h2 id="step-2">Step 2</h2>
+<p>Go to your private opera window and navigate to your domain.
+You should see apache’s default html page saying it works.</p>
+
+<h2 id="step-3-enable-secure-http-on-your-site">Step 3: Enable secure http on your site</h2>
+<p>Lets make that page secure. Go to certbot and select <code class="highlighter-rouge">Apache</code> and your  OS
+for example <code class="highlighter-rouge">Xenial</code></p>
+
+<p>Install the apache package for letsencrypt;
+<code class="highlighter-rouge">$ sudo apt-get install python-letsencrypt-apache</code></p>
+
+<p><code class="highlighter-rouge">$ letsencrypt --apache</code></p>
+
+<p>Now navigate to your <code class="highlighter-rouge">/etc/apache2/sites-available/</code> folder and check to see if <code class="highlighter-rouge">default-ssl.conf</code> exists, if it does enable it and reload apache;</p>
+
+<p><code class="highlighter-rouge">sudo service a2ensite default-ssl.conf</code>
+<code class="highlighter-rouge">sudo service apache2 restart</code></p>
+
+<p>And go to your private Opera window and navigate to your website. 
+If it doesn’t exist go back to the previous step or make sure that you have appropriate rights.</p>
+
+<h2 id="last-step">Last Step</h2>
+<p>Edit <code class="highlighter-rouge">myapp.wsgi</code> to look like this;</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">activate_this</span> <span class="o">=</span> <span class="s">'/home/your_user_name/myapp/app/venv/bin/activate_this.py'</span>
+<span class="nb">execfile</span><span class="p">(</span><span class="n">activate_this</span><span class="p">,</span><span class="nb">dict</span><span class="p">(</span><span class="n">__file__</span><span class="o">=</span><span class="n">activate_this</span><span class="p">))</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="n">logging</span><span class="p">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">stream</span><span class="o">=</span><span class="n">sys</span><span class="p">.</span><span class="n">stderr</span><span class="p">)</span>
+<span class="n">sys</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s">'/home/your_user_name/myapp'</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">app</span> <span class="kn">import</span> <span class="n">app</span> <span class="k">as</span> <span class="n">application</span>
+</code></pre></div></div>
+
+<p>Edit your <code class="highlighter-rouge">000-default.conf</code> and your <code class="highlighter-rouge">default-ssl.conf</code> thus;
+Comment out the <code class="highlighter-rouge">DocumentRoot</code> line. 
+Your <code class="highlighter-rouge">000-default.conf</code> should  look like sometihng like this;</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&lt;</span><span class="nc">VirtualHost</span> <span class="o">*:</span><span class="mi">80</span><span class="o">&gt;</span>
+<span class="nc">ServerName</span> <span class="n">mydomain</span><span class="o">.</span><span class="na">com</span>
+<span class="nc">ServerAlias</span> <span class="n">mydomain</span><span class="o">.</span><span class="na">com</span>
+<span class="nc">ServerAdmin</span> <span class="n">myemail</span><span class="nd">@gmail</span><span class="o">.</span><span class="na">com</span>
+<span class="nc">Redirect</span> <span class="n">permanent</span> <span class="o">/</span> <span class="nl">https:</span><span class="c1">//www.mydomain.com</span>
+
+<span class="nc">ErrorLog</span> <span class="o">/</span><span class="kt">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">logs</span><span class="o">/</span><span class="n">error</span><span class="o">.</span><span class="na">log</span>
+<span class="nc">CustomLog</span> <span class="o">/</span><span class="kt">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">access</span><span class="o">.</span><span class="na">log</span> <span class="n">combined</span>
+<span class="o">&lt;/</span><span class="nc">VirtualHost</span><span class="o">&gt;</span>
+</code></pre></div></div>
+<p>And your <code class="highlighter-rouge">default-ssl.conf</code> file should look thus;</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">&lt;</span><span class="nc">IfModule</span> <span class="n">mod_ssl</span><span class="o">.</span><span class="na">c</span><span class="o">&gt;</span>
+ <span class="o">&lt;</span><span class="nc">VirtualHost</span> <span class="nl">_default_:</span><span class="mi">443</span><span class="o">&gt;</span>
+ <span class="nc">ServerAdmin</span> <span class="n">myemail</span><span class="nd">@gmail</span><span class="o">.</span><span class="na">com</span>
+ <span class="nc">ServerName</span> <span class="n">mydomain</span><span class="o">.</span><span class="na">com</span>
+ <span class="nc">ServerAlias</span> <span class="n">www</span><span class="o">.</span><span class="na">mydomain</span><span class="o">.</span><span class="na">com</span>
+
+ <span class="nc">WSGIDaemonProcess</span> <span class="n">myapp</span> <span class="n">user</span><span class="o">=</span><span class="n">your_user_name</span> <span class="n">group</span><span class="o">=</span><span class="n">www</span><span class="o">-</span><span class="n">data</span> <span class="n">threads</span><span class="o">=</span><span class="mi">5</span>
+ <span class="nc">WSGIScriptAlias</span> <span class="o">/</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">your_user_name</span><span class="o">/</span><span class="nc">MyApp</span><span class="o">/</span><span class="n">myapp</span><span class="o">.</span><span class="na">wsgi</span>
+
+<span class="o">&lt;</span><span class="nc">Directory</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">your_user_name</span><span class="o">/</span><span class="n">myapp</span><span class="o">/&gt;</span>
+ <span class="nc">WSGIProcessGroup</span> <span class="n">myapp</span>
+ <span class="nc">WSGIApplicationGroup</span> <span class="o">%{</span><span class="no">GLOBAL</span><span class="o">}</span>
+ <span class="nc">Order</span> <span class="n">allow</span><span class="o">,</span><span class="n">deny</span>
+ <span class="nc">Allow</span> <span class="n">from</span> <span class="n">all</span>
+ <span class="nc">Require</span> <span class="n">all</span> <span class="n">granted</span>
+<span class="o">&lt;/</span><span class="nc">Directory</span><span class="o">&gt;</span>
+
+<span class="nc">Alias</span> <span class="o">/</span><span class="kd">static</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">your_user_name</span><span class="o">/</span><span class="n">myapp</span><span class="o">/</span><span class="n">app</span><span class="o">/</span><span class="kd">static</span>
+<span class="o">&lt;</span><span class="nc">Directory</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">your_user_name</span><span class="o">/</span><span class="n">myapp</span><span class="o">/</span><span class="n">app</span><span class="o">/</span><span class="kd">static</span><span class="o">&gt;</span>
+ <span class="nc">Order</span> <span class="n">allow</span><span class="o">,</span><span class="n">deny</span>
+ <span class="nc">Allow</span> <span class="n">from</span> <span class="n">all</span>
+ <span class="nc">Require</span> <span class="n">all</span> <span class="n">granted</span>
+<span class="o">&lt;/</span><span class="nc">Directory</span><span class="o">&gt;</span>
+
+ <span class="nc">ErrorLog</span> <span class="o">/</span><span class="kt">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">logs</span><span class="o">/</span><span class="n">error</span><span class="o">.</span><span class="na">log</span>
+ <span class="nc">Customlog</span> <span class="o">/</span><span class="kt">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">logs</span><span class="o">/</span><span class="n">access</span><span class="o">.</span><span class="na">log</span> <span class="n">combined</span>
+
+ <span class="nc">SSLEngine</span> <span class="n">on</span>
+ <span class="nc">SSLCertificateFile</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">letsencrypt</span><span class="o">/</span><span class="n">live</span><span class="o">/</span><span class="n">mydomain</span><span class="o">.</span><span class="na">com</span><span class="o">/</span><span class="n">fullchain</span><span class="o">.</span><span class="na">pem</span>
+ <span class="nc">SSLCertificateKeyFile</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">letsencrypt</span><span class="o">/</span><span class="n">live</span><span class="o">/</span><span class="n">mydomain</span><span class="o">.</span><span class="na">com</span><span class="o">/</span><span class="n">privkey</span><span class="o">.</span><span class="na">pem</span>
+
+ <span class="o">&lt;</span><span class="nc">FilesMatch</span> <span class="s">"\.(cgi|shtml|phtml|php)$"</span><span class="o">&gt;</span>
+ <span class="nc">SSLOptions</span> <span class="o">+</span><span class="nc">StdEnvVars</span>
+ <span class="o">&lt;/</span><span class="nc">FilesMatch</span><span class="o">&gt;</span>
+ <span class="o">&lt;</span><span class="nc">Directory</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">cgi</span><span class="o">-</span><span class="n">bin</span><span class="o">&gt;</span>
+ <span class="nc">SSLOptions</span> <span class="o">+</span><span class="nc">StdEnvVars</span>
+ <span class="o">&lt;/</span><span class="nc">Directory</span><span class="o">&gt;</span>
+ <span class="nc">BrowserMatch</span> <span class="s">"MSIE [2-6]"</span><span class="err">\</span>
+ <span class="n">nokeepalive</span> <span class="n">ssl</span><span class="o">-</span><span class="n">unclean</span><span class="o">-</span><span class="n">shutdown</span> <span class="err">\</span>
+ <span class="n">downgrade</span><span class="o">-</span><span class="mf">1.0</span> <span class="n">force</span><span class="o">-</span><span class="n">response</span><span class="o">-</span><span class="mf">1.0</span>
+ <span class="nc">BrowserMatch</span> <span class="s">"MSIE [17-9]"</span> <span class="n">ssl</span><span class="o">-</span><span class="n">unclean</span><span class="o">-</span><span class="n">shutdown</span>
+
+ <span class="o">&lt;/</span><span class="nc">VirtualHost</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="nc">IfModule</span><span class="o">&gt;</span>
+</code></pre></div></div>
+
+<h2 id="conclusion">Conclusion</h2>
+<p>In this example, we run our app from a script located in MyApp. The reasons for this will be made clear later on. The script is named <code class="highlighter-rouge">__init__.py</code> for a reason that will become clear in the next post. This is how it looks like;</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#!app/venv/bin/python
+</span><span class="kn">from</span> <span class="nn">app</span> <span class="kn">import</span> <span class="n">app</span>
+<span class="k">if</span> <span class="n">__name__</span><span class="o">==</span><span class="s">'__main__'</span><span class="p">:</span>
+ <span class="n">app</span><span class="p">.</span><span class="n">run</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s">'127.0.0.1'</span><span class="p">,</span><span class="n">debug</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Before I forget, make sure that everything your MyApp folder has the right user and groups see <code class="highlighter-rouge">default-ssl.conf</code> in the previous step. 
+ If it doesn’t navigate to the folder MyApp folder and do;</p>
+
+<p><code class="highlighter-rouge">chown -R your_user_name:www-data MyApp</code></p>
+
+<p>That’s it for now!
+ Happy coding!</p>
+:ET

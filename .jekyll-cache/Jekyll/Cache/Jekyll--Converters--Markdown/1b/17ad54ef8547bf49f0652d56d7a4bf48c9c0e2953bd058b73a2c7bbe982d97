@@ -1,0 +1,2 @@
+I"µ<p>Last time we connected a database to our app, and how to add records. We also added a backend interface to our app to allow owners to add and remove records. We configured various flask extensions and added some <code class="highlighter-rouge">CSS</code> styling to our <code class="highlighter-rouge">HTML</code> templates. Today weâ€™re going to be looking at; managing users, adding a cart and implementing a checkout process.</p>
+:ET

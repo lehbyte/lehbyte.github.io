@@ -1,0 +1,374 @@
+I"�<p><img src="/assets/img/pexels/raj_main_feature_part4.png" alt="Update2" /></p>
+
+<h1 class="text-center">Hello once again!</h1>
+<p>It’s been a while since we last saw each other. Ha ha. Check out that front look! Those are some gorgeous images! Anyway, I’ve got some exciting news but first, lets recap or catch-up. <br /></p>
+
+<p>In part 3 of this series, we saw how to manage users for our app. Specifically we looked into how to create users, blueprints and admins to add backend content to our app. We also experimented a bit with various styles. <br /> The app looks pretty neat on the desktop as well as on mobile screens.</p>
+
+<p>Now the exciting stuff;</p>
+
+<ol>
+  <li>Managing credentials for development purposes</li>
+  <li><code class="highlighter-rouge">Migrations</code>, <code class="highlighter-rouge">migrations</code>, <code class="highlighter-rouge">migrations</code></li>
+  <li>Adding <code class="highlighter-rouge">yummy</code> food images to our app</li>
+  <li><code class="highlighter-rouge">Checkout!</code> comes to our app</li>
+  <li><del>Creating a <code class="highlighter-rouge">blog</code> <code class="highlighter-rouge">Blueprint</code></del> part 5</li>
+</ol>
+
+<p>Your app should look gorgeous by the end of this post.</p>
+
+<h2 id="managing-credentials-for-development">Managing credentials for development</h2>
+
+<p>In <a href="/2019/09/10/part-2.html">part 2</a> I suggested we use pydotenv to manage our app secrets, things like the <code class="highlighter-rouge">database</code> <code class="highlighter-rouge">password</code> and so on;</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">pydotenv</span>
+<span class="n">env</span> <span class="o">=</span> <span class="n">pydotenv</span><span class="p">.</span><span class="n">Environment</span><span class="p">()</span>
+<span class="n">SQLALCHEMY_DATABASE_URI</span> <span class="o">=</span> <span class="s">'postgresql://username:'</span><span class="o">+</span><span class="n">env</span><span class="p">[</span><span class="s">'DB_PASSWORD'</span><span class="p">]</span><span class="o">+</span><span class="s">'@localhost:5432/raj_db'</span>
+</code></pre></div></div>
+
+<p>However, there was a problem, my app was not connecting to my database - <code class="highlighter-rouge">raj_db</code>. 
+I openned up a python shell to test the <code class="highlighter-rouge">pydotenv</code> package and sure enough it didn’t work for mypassword. <br /> I had a number of options;</p>
+
+<ol>
+  <li>Change my database password to one that works with pydotenv.</li>
+  <li>Fork <code class="highlighter-rouge">pydotenv</code> and fix and use it instead of the original one.</li>
+</ol>
+
+<p>I opted to go with option 2.<br />
+So I headed over to the <code class="highlighter-rouge">git</code> repository of the <code class="highlighter-rouge">pydotenv</code> package to find our why my password was being split. <br /> This is what I found;</p>
+
+<p><img src="/assets/img/pexels/problem.png" alt="img" /></p>
+
+<p>This is the function that parses each line from the <code class="highlighter-rouge">.env</code> file. The code for the parser is wrong! <br /> That is if your password contains the <code class="highlighter-rouge">#</code> symbol. <br />
+Secondly, the author doesn’t warn users about this shortcoming. If you’re stuck here it’s better to add a comment stating that the parser does not work for passwords containing the <code class="highlighter-rouge">#</code> symbol. <br /></p>
+
+<p>The solution to me was obvious, replace the <code class="highlighter-rouge">#</code> with a single space.</p>
+
+<p><img src="/assets/img/pexels/solution.png" alt="img" /></p>
+
+<p>Of course I had to <code class="highlighter-rouge">fork</code> the original project to do this since the project itself appears to be abandoned. I commited my changes and pushed the fix to my <code class="highlighter-rouge">fork</code> of <code class="highlighter-rouge">pydotenv</code>. I didn’t really have time to do a pull request because I didn’t think my fix was robust enough for people whose passwords might contain spaces.</p>
+
+<h3 id="incorporating-our-solution">Incorporating our solution</h3>
+
+<p>After testing that the fix worked, it was time to import my own version of <code class="highlighter-rouge">pydotenv</code>. 
+I did this by generating a <code class="highlighter-rouge">requirements.txt</code> file;<code class="highlighter-rouge">(pyenv) pip freeze -r &gt; requirements.txt</code>
+Then I opened <code class="highlighter-rouge">requirements.txt</code> and replaced <code class="highlighter-rouge">pydotenv</code> with  <code class="highlighter-rouge">git+https://github.com/lehbyte/pydotenv.git#egg=pydotenv</code></p>
+
+<p>Finally, I then ran; <code class="highlighter-rouge">(pyenv) pip install -r requirements.txt</code> and my app was finally able to connect to my database <code class="highlighter-rouge">raj.db</code>.</p>
+
+<p>Of course all of this would have been done by simply navigating to the <code class="highlighter-rouge">pydotenv</code> package within my <code class="highlighter-rouge">virtualenv</code> <code class="highlighter-rouge">pyenv</code> and applying the fix there but then I wouldn’t be able to do a pull request and you wouldn’t be able to download my fix to use. <code class="highlighter-rouge">:(</code></p>
+
+<h3 id="modifying-configpy">Modifying <code class="highlighter-rouge">config.py</code></h3>
+<p>Ok since <code class="highlighter-rouge">pydotenv</code> works, it’s time to update our <code class="highlighter-rouge">config.py</code>;</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pydotenv</span>
+<span class="n">env</span> <span class="o">=</span> <span class="n">pydotenv</span><span class="p">.</span><span class="n">Environment</span><span class="p">()</span>
+<span class="n">basedir</span> <span class="o">=</span> <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="p">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">))</span>
+
+<span class="n">FLASK_ADMIN_SWATCH</span> <span class="o">=</span> <span class="s">'cerulean'</span>
+<span class="n">TEMPLATES_AUTO_RELOAD</span> <span class="o">=</span> <span class="bp">True</span>
+
+<span class="n">SQLALCHEMY_DATABASE_URI</span> <span class="o">=</span> <span class="s">'postgresql://'</span><span class="o">+</span><span class="n">env</span><span class="p">[</span><span class="s">'USER'</span><span class="p">]</span><span class="o">+</span><span class="s">':'</span><span class="o">+</span><span class="n">env</span><span class="p">[</span><span class="s">'PASS'</span><span class="p">]</span><span class="o">+</span><span class="s">'@localhost:'</span><span class="o">+</span><span class="n">env</span><span class="p">[</span><span class="s">'PORT'</span><span class="p">]</span><span class="o">+</span><span class="s">'/'</span><span class="o">+</span><span class="n">env</span><span class="p">[</span><span class="s">'DB'</span><span class="p">]</span>
+<span class="n">SQLACHEMY_TRACK_MODIFICATIONS</span> <span class="o">=</span> <span class="bp">False</span>
+
+<span class="n">WTF_CSRF_ENABLED</span><span class="o">=</span><span class="bp">True</span>
+<span class="n">SECRET_KEY</span><span class="o">=</span><span class="s">'mysecretkey'</span>
+</code></pre></div></div>
+
+<h3 id="env"><code class="highlighter-rouge">.env</code></h3>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">FLASK_APP</span><span class="o">=</span><span class="n">app</span>
+<span class="n">FLASK_ENV</span><span class="o">=</span><span class="n">development</span>
+<span class="n">USER</span><span class="o">=</span><span class="n">your_username</span>
+<span class="n">PASS</span><span class="o">=</span><span class="n">your_password</span>
+<span class="n">PORT</span><span class="o">=</span><span class="mi">5432</span>
+<span class="n">DB</span><span class="o">=</span><span class="n">your_database</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="migrations-migrations-migrations">Migrations, migrations, migrations</h2>
+
+<p>Usually when we change something in our <code class="highlighter-rouge">models.py</code> we have to delete and recreate our database from scratch all over again. <br /> This is very inconvenient during development so we need a tool that will make the changes for us without deleting and recreating the entire database.</p>
+
+<p>That tool is <code class="highlighter-rouge">flask-migrate</code>. Let’s install it;</p>
+<blockquote>
+  <p><code class="highlighter-rouge">(pyenv) pip install flask-migrate</code></p>
+</blockquote>
+
+<p>Now lets initialize our app for migrations;</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">flask_sqlalchemy</span> <span class="kn">import</span> <span class="n">SQLAlchemy</span>
+<span class="kn">from</span> <span class="nn">flask_migrate</span> <span class="kn">import</span> <span class="n">Migrate</span>
+<span class="kn">from</span> <span class="nn">flask_admin</span> <span class="kn">import</span> <span class="n">Admin</span>
+<span class="kn">from</span> <span class="nn">app</span> <span class="kn">import</span> <span class="n">raj</span>
+
+<span class="n">db</span> <span class="o">=</span> <span class="n">SQLAlchemy</span><span class="p">(</span><span class="n">raj</span><span class="p">)</span>
+<span class="n">migrate</span> <span class="o">=</span> <span class="n">Migrate</span><span class="p">(</span><span class="n">raj</span><span class="p">,</span> <span class="n">db</span><span class="p">)</span>
+<span class="n">admin</span> <span class="o">=</span> <span class="n">Admin</span><span class="p">(</span><span class="n">raj</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">User</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">username</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">String</span><span class="p">(</span><span class="mi">80</span><span class="p">),</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">email</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">String</span><span class="p">(</span><span class="mi">120</span><span class="p">),</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">'&lt;User %r&gt;'</span> <span class="o">%</span> <span class="bp">self</span><span class="p">.</span><span class="n">username</span>
+</code></pre></div></div>
+
+<p>Once installed we have to follow the following step to get it setup;</p>
+<ol>
+  <li><code class="highlighter-rouge">flask db init</code></li>
+  <li><code class="highlighter-rouge">flask db migrate</code></li>
+  <li>*<code class="highlighter-rouge">flask db upgrade</code></li>
+</ol>
+
+<p>The last step is not necessary after the first <code class="highlighter-rouge">migration</code> but it is important after every subsequent <code class="highlighter-rouge">migration</code>.</p>
+
+<p>Once you have done that let us make some changes to our <code class="highlighter-rouge">models.py</code> to see if this will work.</p>
+
+<p>If you remember, we created a food Item in part 2 <a href="/2019/09/10/part-2.html">part 2</a>;
+Let us add one thing; <code class="highlighter-rouge">image</code> and remove unique on everything else;</p>
+
+<h4 id="updated-modelpy">Updated <code class="highlighter-rouge">model.py</code></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">FoodItem</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">Model</span><span class="p">):</span>    
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">String</span><span class="p">(</span><span class="mi">80</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">String</span><span class="p">(</span><span class="mi">250</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">price</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">Float</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">String</span><span class="p">(</span><span class="mi">50</span><span class="p">))</span>
+    <span class="n">prep_time</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">Integer</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="c1">#date = 
+</span>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">'&lt;Food Item %r'</span> <span class="o">%</span> <span class="bp">self</span><span class="p">.</span><span class="n">title</span>
+
+</code></pre></div></div>
+
+<p>Now let us <code class="highlighter-rouge">migrate</code> and <code class="highlighter-rouge">upgrade</code>;</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(pyenv) flask db migrate
+(pyenv) flask db upgrade
+</code></pre></div></div>
+
+<p>If all went well then you should receive 0 errors.
+Remeber to run those two commands everytime you change something in your models!
+If you get any problems post them in the comment section below.</p>
+
+<hr />
+
+<h2 class="text-center"> Adding food images to our app </h2>
+
+<p><img src="/assets/img/pexels/raj_main_feature_part4.png" alt="Update2" /></p>
+
+<h3 id="where-to-find-good-images">Where to find good images.</h3>
+
+<p>Go to <a href="https://www.pexels.com">pexels.com</a> and search fod food. You will find a lot of nice looking images. Download the ones you like and put them in your <code class="highlighter-rouge">/static/img/</code> folder.</p>
+
+<h3 id="adding-the-images">Adding the images</h3>
+
+<p>Let’s modify our <code class="highlighter-rouge">FoodItem</code> model to include a string field for the image path;</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">FoodItem</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s">'food_item'</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">Integer</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">String</span><span class="p">(</span><span class="mi">80</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">desc</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">String</span><span class="p">(</span><span class="mi">250</span><span class="p">),</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">price</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">Float</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">prep_time</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">Integer</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">String</span><span class="p">(</span><span class="mi">250</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">date_added</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">DateTime</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Let us migrate those changes;</p>
+<ol>
+  <li><code class="highlighter-rouge">$(pyenv) flask db migrate</code></li>
+  <li><code class="highlighter-rouge">$(pyenv) flask db upgrade</code></li>
+</ol>
+
+<p>Now run your app <code class="highlighter-rouge">$(pyenv) ./run.py</code> and navigate to <code class="highlighter-rouge">localhost:3000/admin/FoodItem</code> to begin adding items. For the image field just put the name of the image. For example, 
+<code class="highlighter-rouge">burger.jpg</code> and do that for every food item you add. <br /> Make sure that every food item has an image with the file name of an image that actually exists in your <code class="highlighter-rouge">/static/img</code> folder.</p>
+
+<h3 id="frontend">FrontEnd</h3>
+
+<p>Let’s load the images into our home page.</p>
+
+<p>First, import <code class="highlighter-rouge">FoodItem</code> from your <code class="highlighter-rouge">models</code> at the top of your <code class="highlighter-rouge">views.py</code>;</p>
+<h4 id="appviewspy"><code class="highlighter-rouge">app/views.py</code></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">...</span>
+<span class="kn">from</span> <span class="nn">app.models</span> <span class="kn">import</span> <span class="n">FoodItem</span>
+<span class="p">...</span>
+</code></pre></div></div>
+<p>Then, update your <code class="highlighter-rouge">home</code> function in your views;</p>
+<h4 id="appviewspy-1"><code class="highlighter-rouge">app/views.py</code></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">@</span><span class="n">raj</span><span class="p">.</span><span class="n">route</span><span class="p">(</span><span class="s">'/'</span><span class="p">)</span>
+<span class="o">@</span><span class="n">raj</span><span class="p">.</span><span class="n">route</span><span class="p">(</span><span class="s">'/home'</span><span class="p">)</span>
+<span class="o">@</span><span class="n">raj</span><span class="p">.</span><span class="n">route</span><span class="p">(</span><span class="s">'/index'</span><span class="p">)</span>
+<span class="o">@</span><span class="n">templated</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">home</span><span class="p">():</span>
+    <span class="c1"># user = g.user
+</span>    <span class="c1"># food_items = app.Models.FoodItem
+</span>    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">app_name</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">,</span> <span class="n">dishes</span><span class="o">=</span><span class="n">FoodItem</span><span class="p">.</span><span class="n">query</span><span class="p">.</span><span class="nb">all</span><span class="p">())</span>
+</code></pre></div></div>
+
+<p>Now we can use dishes in <code class="highlighter-rouge">home.html</code>;</p>
+<h4 id="apptemplateshomehtml"><code class="highlighter-rouge">app/templates/home.html</code></h4>
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>...
+<span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"food-grid"</span><span class="nt">&gt;</span>
+    {% for dish in dishes %}
+    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"food-item"</span><span class="nt">&gt;</span>      
+        <span class="nt">&lt;img</span> <span class="na">src=</span><span class="s">"{{ url_for( 'static', filename='img/' + dish.image ) }}"</span> <span class="na">alt=</span><span class="s">""</span> <span class="nt">/&gt;</span>
+        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"food-box"</span><span class="nt">&gt;</span>
+          <span class="nt">&lt;p&gt;&lt;span&gt;</span>Dish #: <span class="nt">&lt;/span&gt;</span> {{ dish.id }} <span class="nt">&lt;/p&gt;</span>
+          <span class="nt">&lt;a</span> <span class="na">class=</span><span class="s">"food-link"</span> <span class="na">href=</span><span class="s">"/add/{{ dish.id }}"</span><span class="nt">&gt;</span> Add to tray <span class="nt">&lt;/a&gt;</span>
+        <span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>    
+    {% endfor %}
+  <span class="nt">&lt;/div&gt;</span>
+...
+</code></pre></div></div>
+<p><br /></p>
+
+<p>The images do load but they aren’t responsive, i.e. they do not fit within our <code class="highlighter-rouge">menu-grid</code> system.<br />For that, we need <a href="https://github.com/wentin/ResponsifyJS">responsify.js</a>. 
+Download <code class="highlighter-rouge">responsify.js</code> and <code class="highlighter-rouge">responsify.min.js</code> into your <code class="highlighter-rouge">static/js/</code> folder. <br />
+Since both scripts use <code class="highlighter-rouge">jQuery</code> we need to download it as well, then we have to include all scripts at the bottom of our <code class="highlighter-rouge">base.html</code> like this;</p>
+
+<h4 id="apptemplatesbasehtml"><code class="highlighter-rouge">app/templates/base.html</code></h4>
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>...
+    <span class="nt">&lt;/main&gt;</span>
+    <span class="c">&lt;!-- JavaScripts --&gt;</span>    
+    <span class="nt">&lt;script
+        </span><span class="na">src=</span><span class="s">"https://code.jquery.com/jquery-2.2.4.min.js"</span>
+        <span class="na">integrity=</span><span class="s">"sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="</span>
+        <span class="na">crossorigin=</span><span class="s">"anonymous"</span><span class="nt">&gt;</span>
+     <span class="nt">&lt;/script&gt;</span>
+     <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"static/js/responsify.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+     <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"static/js/main.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+  <span class="nt">&lt;/body&gt;</span>
+  <span class="c">&lt;!--body --&gt;</span>
+...
+</code></pre></div></div>
+<p>Then we can use <code class="highlighter-rouge">responsify.js</code> in our <code class="highlighter-rouge">main.js</code> like so;</p>
+<h4 id="appstaticjsmainjs"><code class="highlighter-rouge">app/static/js/main.js</code></h4>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+    <span class="nx">$</span><span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">onload</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">$</span><span class="p">(</span><span class="dl">'</span><span class="s1">img</span><span class="dl">'</span><span class="p">).</span><span class="nx">responsify</span><span class="p">();</span>
+    <span class="p">}));</span>
+    <span class="nx">$</span><span class="p">(</span><span class="nb">window</span><span class="p">).</span><span class="nx">resize</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+        <span class="nx">$</span><span class="p">(</span><span class="dl">'</span><span class="s1">img</span><span class="dl">'</span><span class="p">).</span><span class="nx">responsify</span><span class="p">();</span>
+    <span class="p">});</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<hr />
+<p><br /></p>
+
+<h3 id="the-tray-function">The <code class="highlighter-rouge">Tray</code> function</h3>
+
+<h4 id="appviewspy-2"><code class="highlighter-rouge">app/views.py</code></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">@</span><span class="n">raj</span><span class="p">.</span><span class="n">route</span><span class="p">(</span><span class="s">'/add/&lt;int:dish&gt;'</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s">'GET'</span><span class="p">,</span><span class="s">'POST'</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">add</span><span class="p">():</span>
+    <span class="c1"># associate this dish with the current user
+</span>    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s">"previous URL"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>What this function will do is associate the <code class="highlighter-rouge">current</code> user with the <code class="highlighter-rouge">FoodItem</code> id that was passed in. In order to do that we have to create a database <code class="highlighter-rouge">relationship</code> between the <code class="highlighter-rouge">User</code> and the <code class="highlighter-rouge">FoodItem</code>. <br /></p>
+
+<p>We will do this in <code class="highlighter-rouge">part 5</code><br />
+After making the association we will redirect the user to the previous <code class="highlighter-rouge">URL</code> and <code class="highlighter-rouge">flash</code> them a message stating that the item was added to the chart.</p>
+
+<p>What other things do we need to do? We need to define a checkout process.</p>
+
+<h2 id="checkout">Checkout!</h2>
+
+<p>Remeber that a user needs to be able to;</p>
+<ol>
+  <li>Add items onto a cart</li>
+  <li>See a complete break down of charges, including taxes</li>
+  <li>Have the option to accept or cancel at any point before their card is charged</li>
+  <li>Be able to choose from a variety of payment options</li>
+  <li>Receive a receipt of the transaction</li>
+</ol>
+
+<p>Let us try to implement some of these features;</p>
+
+<h3 id="the-checkout-function">The <code class="highlighter-rouge">checkout</code> function</h3>
+<h4 id="appviewspy-3"><code class="highlighter-rouge">app/views.py</code></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">...</span>
+<span class="o">@</span><span class="n">raj</span><span class="p">.</span><span class="n">route</span><span class="p">(</span><span class="s">'/checkout'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">checkout</span><span class="p">():</span>
+    <span class="n">current_user</span> <span class="o">=</span> <span class="n">g</span><span class="p">.</span><span class="n">user</span>
+    <span class="n">subtotal</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span> <span class="n">g</span><span class="p">.</span><span class="n">user</span><span class="p">[</span><span class="s">'tray'</span><span class="p">]</span> <span class="p">)</span>
+    <span class="n">taxes</span> <span class="o">=</span> <span class="n">calc_tax</span><span class="p">(</span> <span class="n">subtotal</span> <span class="p">)</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="n">subtotal</span> <span class="o">+</span> <span class="n">taxes</span>
+    <span class="k">return</span> <span class="n">render_html</span><span class="p">(</span><span class="s">'checkout.html'</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="n">total</span><span class="p">,</span> <span class="n">subtotal</span><span class="o">=</span><span class="n">subtotal</span><span class="p">,</span> <span class="n">taxes</span><span class="o">=</span><span class="n">taxes</span><span class="p">)</span>
+<span class="p">...</span>
+</code></pre></div></div>
+<p><code class="highlighter-rouge">sum</code> calculates the total price of all the food items in the <code class="highlighter-rouge">current_user</code>’s tray. 
+We will look at how the current user is determined later on.</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">...</span>
+<span class="k">def</span> <span class="nf">sum</span><span class="p">(</span><span class="n">tray</span><span class="p">):</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">dish</span> <span class="ow">in</span> <span class="n">tray</span><span class="p">:</span>
+        <span class="n">total</span> <span class="o">+=</span> <span class="n">dish</span><span class="p">.</span><span class="n">price</span>
+    <span class="k">return</span> <span class="n">total</span>
+<span class="p">...</span>
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">calc_tax</code> calculates the amount of tax to be paid from the <code class="highlighter-rouge">subtotal</code> obtained previously
+Then we calculate the total and send this information to the <code class="highlighter-rouge">checkout.html</code> template via three variables, <code class="highlighter-rouge">total</code>, <code class="highlighter-rouge">subtotal</code>, and <code class="highlighter-rouge">taxes</code>.</p>
+
+<h3 id="the-pay-function">The <code class="highlighter-rouge">pay</code> function</h3>
+<p>This will be the second view the user will be presented with and immediately follows the <code class="highlighter-rouge">checkout</code> view, provided nothing goes wrong there.</p>
+
+<p>In <code class="highlighter-rouge">checkout.html</code> we will need to send the <code class="highlighter-rouge">total_price</code> to the <code class="highlighter-rouge">pay</code> route somehow;</p>
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;a</span> <span class="na">href=</span><span class="s">"/pay/{{ total_price }}"</span><span class="nt">&gt;</span> Accept <span class="nt">&lt;/a&gt;</span>
+</code></pre></div></div>
+
+<p>Now we can use the <code class="highlighter-rouge">total_price</code> to charge the user’s card.</p>
+
+<h4 id="appviewspy-4"><code class="highlighter-rouge">app/views.py</code></h4>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">@</span><span class="n">raj</span><span class="p">.</span><span class="n">route</span><span class="p">(</span><span class="s">'/pay/&lt;float:total_price&gt;'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">pay</span><span class="p">():</span>
+    <span class="c1"># Choose a method of payment
+</span>    <span class="c1"># PayPal
+</span>    <span class="c1"># SquareCash
+</span>    <span class="c1"># Visa/MasterCard
+</span>    <span class="c1"># Venmo/Zelle/Other
+</span>    <span class="n">payment</span> <span class="o">=</span> <span class="n">verify</span><span class="p">(</span> <span class="n">total_price</span> <span class="p">)</span>
+    <span class="n">paycode</span> <span class="o">=</span> <span class="n">payment</span><span class="p">.</span><span class="n">code</span>
+    <span class="k">if</span> <span class="n">payment</span><span class="p">.</span><span class="n">successful</span><span class="p">:</span>
+        <span class="n">receipt</span> <span class="o">=</span> <span class="n">generate_receipt</span><span class="p">(</span> <span class="n">g</span><span class="p">.</span><span class="n">user</span><span class="p">[</span><span class="s">'tray'</span><span class="p">],</span> <span class="n">total_price</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s">'payment_success.html'</span><span class="p">,</span> <span class="n">receipt</span><span class="o">=</span><span class="n">receipt</span><span class="p">,</span> <span class="n">status_code</span><span class="o">=</span><span class="n">paycode</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s">'payment_failure.html'</span><span class="p">,</span> <span class="n">status_code</span><span class="o">=</span><span class="n">paycode</span><span class="p">)</span>
+<span class="p">...</span>
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">verify</code> simply checks to see that the payment went through. 
+We will see how to define this function in <code class="highlighter-rouge">part 5</code>but it should be clear what we expect from verify; an object with atleast the following members;</p>
+<ol>
+  <li>A status<code class="highlighter-rouge">code</code> # a code for describing the status of the verification</li>
+  <li>A <code class="highlighter-rouge">boolean</code> <code class="highlighter-rouge">successful</code> to indicate that the payment was successful.</li>
+</ol>
+
+<p>A status code is important for troubleshooting. Payments might fail for a variety of reasons;</p>
+<ul>
+  <li>Customers might have insufficient funds in their account</li>
+  <li>The banking services might be down due to maintainence e.t.c</li>
+  <li>The user might have entered the wrong credentials</li>
+  <li>Restaurant owner’s bank might not accept funds from customer’s bank</li>
+  <li>e.t.c</li>
+</ul>
+
+<p>A <code class="highlighter-rouge">status_code</code> that describes each problem mentioned above will make troubleshooting for both <code class="highlighter-rouge">customer</code> and <code class="highlighter-rouge">restaurant</code> owner much easier.</p>
+
+<p><code class="highlighter-rouge">payment_succes.html</code> and <code class="highlighter-rouge">payment_failure.html</code> should be pretty straightforward templates to write.</p>
+
+<p>We shall complete the <code class="highlighter-rouge">checkout</code> part of our app in the next <code class="highlighter-rouge">post</code> until then,
+happy coding :)</p>
+
+<hr />
+
+<p>PS: Here’s what our images look line on mobile;</p>
+
+<p><img src="/assets/img/pexels/raj_mobile_update_part4.png" alt="Update1" /></p>
+:ET

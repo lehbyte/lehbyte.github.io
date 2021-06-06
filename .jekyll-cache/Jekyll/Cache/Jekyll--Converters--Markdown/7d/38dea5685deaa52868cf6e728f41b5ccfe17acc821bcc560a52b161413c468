@@ -1,0 +1,57 @@
+I"Ø<p>I have been having an issue with my settings program not starting.
+I would search for settings or look for it my list of apps and attempt to launch it. However, all I would get is a spinning wheel and then nothing. It would fail in the background without any warning or  error dialog. This is inherently bad design. Anyway I am kind of used to such shortcomings in open source software.</p>
+
+<p>Curious about what was happening in the background, I fired up a bionic terminal and typed gnome-control-center and there it was, the error message meant for terminal-eyes only.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ERROR:../shell/cc-panel-list.c:926:cc_panel_list_set_active_panel: assertion failed: <span class="o">(</span>data <span class="o">!=</span> NULL<span class="o">)</span>
+<span class="o">[</span>1] 7043 abort <span class="o">(</span>core dumped<span class="o">)</span> gnome-control-center
+</code></pre></div></div>
+
+<p>It made little sense to me so I took the liberty of executing gnome-control-center
+<code class="highlighter-rouge">$ gdb gnome-control-center</code> then followed by <code class="highlighter-rouge">run</code></p>
+
+<p>This time I received some helpful information;</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~ gdb gnome-control-center
+GNU gdb <span class="o">(</span>Ubuntu 8.1-0ubuntu3<span class="o">)</span> 8.1.0.20180409-git
+Copyright <span class="o">(</span>C<span class="o">)</span> 2018 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later &lt;http://gnu.org/licenses/gpl.html&gt;
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type <span class="s2">"show copying"</span>
+and <span class="s2">"show warranty"</span> <span class="k">for </span>details.
+This GDB was configured as <span class="s2">"x86_64-linux-gnu"</span><span class="nb">.</span>
+Type <span class="s2">"show configuration"</span> <span class="k">for </span>configuration details.
+For bug reporting instructions, please see:
+&lt;http://www.gnu.org/software/gdb/bugs/&gt;.
+Find the GDB manual and other documentation resources online at:
+&lt;http://www.gnu.org/software/gdb/documentation/&gt;.
+For <span class="nb">help</span>, <span class="nb">type</span> <span class="s2">"help"</span><span class="nb">.</span>
+Type <span class="s2">"apropos word"</span> to search <span class="k">for </span>commands related to <span class="s2">"word"</span>...
+Reading symbols from gnome-control-center...<span class="o">(</span>no debugging symbols found<span class="o">)</span>...done.
+<span class="o">(</span>gdb<span class="o">)</span> n
+The program is not being run.
+<span class="o">(</span>gdb<span class="o">)</span> run
+Starting program: /usr/bin/gnome-control-center 
+<span class="o">[</span>Thread debugging using libthread_db enabled]
+Using host libthread_db library <span class="s2">"/lib/x86_64-linux-gnu/libthread_db.so.1"</span><span class="nb">.</span>
+<span class="o">[</span>New Thread 0x7fffcc836700 <span class="o">(</span>LWP 7400<span class="o">)]</span>
+<span class="o">[</span>New Thread 0x7fffcbb4a700 <span class="o">(</span>LWP 7401<span class="o">)]</span>
+<span class="o">[</span>New Thread 0x7fffcb349700 <span class="o">(</span>LWP 7402<span class="o">)]</span>
+<span class="o">[</span>New Thread 0x7fffcab48700 <span class="o">(</span>LWP 7403<span class="o">)]</span>
+<span class="k">**</span>
+ERROR:../shell/cc-panel-list.c:926:cc_panel_list_set_active_panel: assertion failed: <span class="o">(</span>data <span class="o">!=</span> NULL<span class="o">)</span>
+
+Thread 1 <span class="s2">"gnome-control-c"</span> received signal SIGABRT, Aborted.
+__GI_raise <span class="o">(</span><span class="nv">sig</span><span class="o">=</span>sig@entry<span class="o">=</span>6<span class="o">)</span> at ../sysdeps/unix/sysv/linux/raise.c:51
+51	../sysdeps/unix/sysv/linux/raise.c: No such file or directory.
+<span class="o">(</span>gdb<span class="o">)</span> q
+</code></pre></div></div>
+
+<p>My best guess was that there was a corrupted thread running loose somewhere in the program.</p>
+
+<p>So the best I could do was to force a reset of the gnome control center.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>dconf reset <span class="nt">-f</span> /org/gnome/control-center/
+<span class="nv">$ </span>gnome-control-center
+</code></pre></div></div>
+:ET

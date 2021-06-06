@@ -1,0 +1,807 @@
+I",<p>Last time we connected a database to our app, and how to add records. We also added a backend interface to our app to allow owners to add and remove records. We configured various flask extensions and added some <code class="highlighter-rouge">CSS</code> styling to our <code class="highlighter-rouge">HTML</code> templates. Today we’re going to be looking at; managing users, adding a cart and implementing a checkout process.</p>
+
+<p><img src="/assets/img/pexels/raj_part3_update.png" alt="App" /></p>
+
+<h2 id="objectives">Objectives;</h2>
+
+<ol>
+  <li>User management</li>
+  <li>Using Blueprints</li>
+  <li>Restricting access to owners</li>
+  <li><del>Creating a checkout process</del></li>
+  <li><code class="highlighter-rouge">Experimenting</code></li>
+</ol>
+
+<h2 id="say-hello-to-blueprints">Say <code class="highlighter-rouge">hello</code> to <code class="highlighter-rouge">Blueprints</code></h2>
+
+<p>First we will start off by adding a <code class="highlighter-rouge">Blueprint</code> for authentication. <br />
+What is a <code class="highlighter-rouge">blueprint</code>? A blueprint is simply a collection of views and layouts.  <br />
+<code class="highlighter-rouge">Blueprints</code> simplify what would otherwise be a <code class="highlighter-rouge">hodge-podge</code> of views and layouts. <br />
+It does this by adding structure to your app;</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>➜ app tree <span class="nt">-L</span> 3
+<span class="nb">.</span>
+├── assets
+│   ├── js
+│   │   └── main.coffee
+│   └── scss
+│       ├── _footer.scss
+│       ├── main.scss
+│       ├── _menugrid.scss
+│       ├── _navigation.scss
+│       └── _variables.scss
+├── auth.py
+├── create_db.py
+├── favicon.ico
+├── __init__.py
+├── __init__.pyc
+├── models.py
+├── static
+│   ├── css
+│   │   └── main.css
+│   ├── icons
+│   │   ├── android-chrome-192x192.png
+│   │   ├── android-chrome-512x512.png
+│   │   ├── apple-touch-icon.png
+│   │   ├── favicon-16x16.png
+│   │   ├── favicon-32x32.png
+│   │   ├── favicon.ico
+│   │   └── site.webmanifest
+│   └── js
+│       └── main.js
+├── templates
+│   ├── about.html
+│   ├── auth
+│   │   ├── assets
+│   │   ├── login.html
+│   │   └── signup.html
+|   |─── blog
+│   |   ├── create.html
+│   |   ├── index.html
+│   |   └── update.html
+│   ├── base.html
+│   ├── coupons.html
+│   ├── home.html
+│   ├── menu.html
+│   ├── navigation.html
+│   └── support.html
+├── views.py
+└── views.pyc
+</code></pre></div></div>
+
+<h2 id="structure">Structure</h2>
+
+<p>As you can see we have added quite a number of things to our app! <br />
+Below is a list of files we have added or modified;</p>
+
+<ol>
+  <li><code class="highlighter-rouge">auth.py</code> (added)</li>
+  <li><code class="highlighter-rouge">__init__.py</code> (<em>modified</em>)</li>
+  <li><code class="highlighter-rouge">models.py</code> (<em>modified</em>)</li>
+  <li><code class="highlighter-rouge">templates/auth</code> (added)</li>
+  <li><code class="highlighter-rouge">templates/blog</code> (added)</li>
+  <li><code class="highlighter-rouge">views.py</code> (<em>modified</em>)</li>
+</ol>
+
+<p>Let’s start from the top;</p>
+
+<h2 id="getting-started-with-blueprints">Getting started with Blueprints</h2>
+
+<p>First we need to define our <code class="highlighter-rouge">Blueprint</code> in <code class="highlighter-rouge">auth.py</code>;</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="p">(</span> <span class="n">Blueprint</span><span class="p">,</span> <span class="n">flash</span><span class="p">,</span> <span class="n">redirect</span><span class="p">,</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">url_for</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span>
+
+<span class="n">bp</span> <span class="o">=</span> <span class="n">Blueprint</span><span class="p">(</span><span class="s">'auth'</span><span class="p">,</span> <span class="n">__name__</span><span class="p">,</span> <span class="n">url_prefix</span><span class="o">=</span><span class="s">'/auth'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>The <code class="highlighter-rouge">__name__</code> refers to <code class="highlighter-rouge">auth</code> because the blueprint needs to know where it is defined. <br />
+The <code class="highlighter-rouge">url_prefix</code> as it’s name indicates, will be prepended to all <code class="highlighter-rouge">URLs</code> associated with this <code class="highlighter-rouge">Blueprint</code>.<br />The next step would be to import and register the <code class="highlighter-rouge">Blueprint</code> with our app.<br /></p>
+
+<h3 id="our-new-app__init__py">Our new <code class="highlighter-rouge">app/__init__.py</code></h3>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span>
+
+<span class="n">raj</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+<span class="n">raj</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="n">from_object</span><span class="p">(</span><span class="s">'config'</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">app</span> <span class="kn">import</span> <span class="n">models</span><span class="p">,</span> <span class="n">auth</span><span class="p">,</span> <span class="n">views</span>
+<span class="n">raj</span><span class="p">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">auth</span><span class="p">.</span><span class="n">bp</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>WOAH!</strong> Our new <code class="highlighter-rouge">__init__.py</code> does not look like what we had previously from <a href="">part 2</a>! <br />
+So where did all the other code go? <br /></p>
+
+<h3 id="old-app__init__py">Old <code class="highlighter-rouge">app/__init__.py</code></h3>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="mf">1.</span>  <span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span>
+<span class="mf">2.</span>  <span class="kn">from</span> <span class="nn">flask_scss</span> <span class="kn">import</span> <span class="n">Scss</span>                 <span class="c1"># went to views.py
+</span><span class="mf">3.</span>  <span class="kn">from</span> <span class="nn">flask_admin</span> <span class="kn">import</span> <span class="n">Admin</span>               <span class="c1"># went to views.py
+</span><span class="mf">4.</span>  <span class="kn">from</span> <span class="nn">flask_sqlalchemy</span> <span class="kn">import</span> <span class="n">SQLAlchemy</span>     <span class="c1"># went to models.py
+</span><span class="mf">5.</span>
+<span class="mf">6.</span>  <span class="n">raj</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+<span class="mf">7.</span>  <span class="n">raj</span><span class="p">.</span><span class="n">config</span><span class="p">.</span><span class="n">from_object</span><span class="p">(</span><span class="s">'config'</span><span class="p">)</span>
+<span class="mf">8.</span>  <span class="n">db</span> <span class="o">=</span> <span class="n">SQLAlchemy</span><span class="p">(</span><span class="n">raj</span><span class="p">)</span>                        <span class="c1"># went to models.py
+</span><span class="mf">9.</span>
+<span class="mf">10.</span> <span class="n">Scss</span><span class="p">(</span><span class="n">raj</span><span class="p">,</span> <span class="n">asset_dir</span><span class="o">=</span><span class="s">'app/assets/scss'</span><span class="p">,</span> <span class="n">static_dir</span><span class="o">=</span><span class="s">'app/static/css'</span><span class="p">)</span> <span class="c1"># went to views.py
+</span><span class="mf">11.</span> <span class="n">admin</span> <span class="o">=</span> <span class="n">Admin</span><span class="p">(</span><span class="n">raj</span><span class="p">)</span>                          <span class="c1"># went to models.py
+</span><span class="mf">12.</span> 
+<span class="mf">13.</span> <span class="kn">from</span> <span class="nn">app</span> <span class="kn">import</span> <span class="n">models</span><span class="p">,</span> <span class="n">views</span>
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">Line 8</code> and <code class="highlighter-rouge">line 11</code> both went to <code class="highlighter-rouge">models.py</code> because that’s were they are used. <br />
+ It makes sense to initialize the <code class="highlighter-rouge">db</code> in our <code class="highlighter-rouge">models.py</code>, much less so for <code class="highlighter-rouge">admin</code>. <br />
+ You could still import <code class="highlighter-rouge">admin</code> in your <code class="highlighter-rouge">models.py</code> like you did before - if you want. <br /></p>
+
+<h3 id="updated-modelspy">Updated <code class="highlighter-rouge">models.py</code></h3>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">...</span>
+<span class="kn">from</span> <span class="nn">flask_sqlalchemy</span> <span class="kn">import</span> <span class="n">SQLAlchemy</span>
+<span class="kn">from</span> <span class="nn">flask_admin</span> <span class="kn">import</span> <span class="n">Admin</span>
+<span class="kn">from</span> <span class="nn">app</span> <span class="kn">import</span> <span class="n">raj</span>
+
+<span class="n">db</span> <span class="o">=</span> <span class="n">SQLAlchemy</span><span class="p">(</span><span class="n">raj</span><span class="p">)</span>
+<span class="n">admin</span> <span class="o">=</span> <span class="n">Admin</span><span class="p">(</span><span class="n">raj</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">User</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">username</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">String</span><span class="p">(</span><span class="mi">80</span><span class="p">),</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">email</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">String</span><span class="p">(</span><span class="mi">120</span><span class="p">),</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">'&lt;User %r&gt;'</span> <span class="o">%</span> <span class="bp">self</span><span class="p">.</span><span class="n">username</span>
+
+<span class="p">...</span>
+
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">line 10</code> went to <code class="highlighter-rouge">views.py</code> because they are primarily associated with <code class="highlighter-rouge">views</code>.<br /></p>
+
+<h3 id="updated-viewspy">Updated <code class="highlighter-rouge">views.py</code></h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">url_for</span>
+<span class="kn">from</span> <span class="nn">flask_scss</span> <span class="kn">import</span> <span class="n">Scss</span>
+<span class="kn">from</span> <span class="nn">app</span> <span class="kn">import</span> <span class="n">raj</span>
+
+<span class="n">app_name</span> <span class="o">=</span> <span class="s">"Raj's Restaurant App"</span>
+<span class="n">Scss</span><span class="p">(</span><span class="n">raj</span><span class="p">,</span> <span class="n">asset_dir</span><span class="o">=</span><span class="s">'app/assets/scss'</span><span class="p">,</span> <span class="n">static_dir</span><span class="o">=</span><span class="s">'app/static/css'</span><span class="p">)</span>
+
+<span class="o">@</span><span class="n">raj</span><span class="p">.</span><span class="n">route</span><span class="p">(</span><span class="s">'/'</span><span class="p">)</span>
+<span class="o">@</span><span class="n">raj</span><span class="p">.</span><span class="n">route</span><span class="p">(</span><span class="s">'/index'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+	<span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s">'index.html'</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s">"Raj's Restaurant"</span><span class="p">)</span>
+
+</code></pre></div></div>
+
+<p>Our app should still be able to run as it did before since the only new thing we have added thus far is a <code class="highlighter-rouge">Blueprint</code>. <br /> Lets go ahead and <code class="highlighter-rouge">run</code> our app to make sure everything still runs.  It is recommended to fix any errors you get before going forward. <br />
+You should see something familiar when you <code class="highlighter-rouge">run</code> your app; <br /></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">(</span>pyenv<span class="o">)</span> ➜ raj ./run.py 
+ <span class="k">*</span> Serving Flask app <span class="s2">"app"</span> <span class="o">(</span>lazy loading<span class="o">)</span>
+ <span class="k">*</span> Environment: development
+ <span class="k">*</span> Debug mode: on
+ <span class="k">*</span> Running on http://localhost:3000/ <span class="o">(</span>Press CTRL+C to quit<span class="o">)</span>
+ <span class="k">*</span> Restarting with <span class="nb">stat</span>
+<span class="o">[</span>2019-09-24 12:39:21,361] INFO <span class="k">in </span>flask_scss: Pyscss loaded!
+ <span class="k">*</span> Debugger is active!
+ <span class="k">*</span> Debugger PIN: 214-588-298
+</code></pre></div></div>
+
+<h2 id="back-to-our-blueprint">Back to our <code class="highlighter-rouge">Blueprint</code>!</h2>
+
+<p>All we have done is register our <code class="highlighter-rouge">auth</code> <code class="highlighter-rouge">Blueprint</code> with our app. <br />
+The next step is to define the <code class="highlighter-rouge">routes</code> for our authentication pages; <br /></p>
+
+<ol>
+  <li><code class="highlighter-rouge">Sign Up</code></li>
+  <li><code class="highlighter-rouge">Log In</code></li>
+</ol>
+
+<h2 id="1-sign-up">1. Sign Up</h2>
+<p>What is this <code class="highlighter-rouge">route</code> going to do?</p>
+
+<ul>
+  <li>Take in a user’s information</li>
+  <li>Make sure the user is not already registered</li>
+  <li>Add the user into our <code class="highlighter-rouge">database</code></li>
+</ul>
+
+<h4 id="what-type-of-information-are-we-taking-from-a-new-user"><strong>What type of information are we taking from a new user?</strong></h4>
+<ol>
+  <li>firstname</li>
+  <li>Lastname</li>
+  <li>user_name</li>
+  <li>user_email</li>
+  <li>user_password</li>
+</ol>
+
+<p>So what is the problem??? <br />
+If I remeber correctly, our <code class="highlighter-rouge">User</code> <code class="highlighter-rouge">model</code> only has three attributes;</p>
+
+<p><strong><code class="highlighter-rouge">app/models.py</code></strong></p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">User</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">username</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">String</span><span class="p">(</span><span class="mi">80</span><span class="p">),</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">email</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">String</span><span class="p">(</span><span class="mi">120</span><span class="p">),</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</code></pre></div></div>
+<hr />
+
+<h3 id="update-modelspy">Update <code class="highlighter-rouge">models.py</code></h3>
+<p>Before we update our <code class="highlighter-rouge">models.py</code>, let us close any <code class="highlighter-rouge">databse</code> sessions;</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span><span class="o">(</span>pyenv<span class="o">)</span> python
+<span class="o">&gt;&gt;&gt;</span> from app.models import db
+<span class="o">&gt;&gt;&gt;</span> db.session.close<span class="o">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nb">exit</span><span class="o">()</span>
+</code></pre></div></div>
+
+<p>Ok, now we can go ahead and update our <code class="highlighter-rouge">models.py</code>;</p>
+
+<p><strong><code class="highlighter-rouge">app/models.py</code></strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">...</span> <span class="c1"># Other import statements
+</span>
+<span class="kn">import</span> <span class="nn">bcrypt</span>
+
+<span class="k">class</span> <span class="nc">User</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s">'users'</span>
+    <span class="n">firstname</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">String</span><span class="p">(</span><span class="mi">127</span><span class="p">))</span>
+    <span class="n">lastname</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">String</span><span class="p">(</span><span class="mi">127</span><span class="p">))</span>
+    <span class="n">email</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">String</span><span class="p">(</span><span class="mi">120</span><span class="p">),</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>    
+    <span class="n">username</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">String</span><span class="p">(</span><span class="mi">80</span><span class="p">),</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">password</span> <span class="o">=</span> <span class="n">db</span><span class="p">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="p">.</span><span class="n">String</span><span class="p">(</span><span class="mi">127</span><span class="p">),</span> <span class="n">unique</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">):</span>        
+        <span class="bp">self</span><span class="p">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">username</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">email</span> <span class="o">=</span> <span class="n">email</span><span class="p">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">set_password</span><span class="p">(</span><span class="n">password</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">set_password</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">password</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">password</span> <span class="o">=</span> <span class="n">bcrypt</span><span class="p">.</span><span class="n">hashpw</span><span class="p">(</span><span class="n">password</span><span class="p">,</span> <span class="n">bcrypt</span><span class="p">.</span><span class="n">gensalt</span><span class="p">())</span>
+    
+    <span class="k">def</span> <span class="nf">check_password</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">password</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">bcrypt</span><span class="p">.</span><span class="n">checkpw</span><span class="p">(</span><span class="n">password</span><span class="p">,</span> <span class="bp">self</span><span class="p">.</span><span class="n">password</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">'&lt;Firstname: %r, Lastname: %r, Email: %r &gt;'</span> <span class="o">%</span>\
+             <span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">firstname</span><span class="p">,</span> <span class="bp">self</span><span class="p">.</span><span class="n">lastname</span><span class="p">,</span> <span class="bp">self</span><span class="p">.</span><span class="n">email</span><span class="p">)</span>
+
+<span class="p">...</span> <span class="c1">### rest of the code
+</span>
+</code></pre></div></div>
+
+<p>All the other code stays the same. <br />
+You will notice that we have also added a number of functions to our class, <br /></p>
+<ol>
+  <li><code class="highlighter-rouge">__init__</code></li>
+  <li><code class="highlighter-rouge">set_password</code></li>
+  <li><code class="highlighter-rouge">check_password</code></li>
+</ol>
+
+<h4 id="__init__"><strong><code class="highlighter-rouge">__init__</code></strong></h4>
+<p>This is simply a constructor for our <code class="highlighter-rouge">User</code>. <br />
+It allows us to easily create users. <br /></p>
+
+<h4 id="set_password-and-check_password"><code class="highlighter-rouge">set_password</code> and <code class="highlighter-rouge">check_password</code></h4>
+<p>When we create new <code class="highlighter-rouge">User</code> a password hash is generated which is then stored as a <code class="highlighter-rouge">password</code>. <br />
+This is also why we need <code class="highlighter-rouge">bcrypt</code>. <br />
+I should also add that you should never store plain user  <code class="highlighter-rouge">passwords</code> in your <code class="highlighter-rouge">app</code>. <br /> You should also avoid storing <code class="highlighter-rouge">hashed</code> <code class="highlighter-rouge">passwords</code> unsalted. <br /></p>
+
+<p>If you’re curious, salting simply adds <code class="highlighter-rouge">entropy</code> to your password before it is <code class="highlighter-rouge">hashed</code>. This prevents <code class="highlighter-rouge">rainbow</code> attacks. <br /></p>
+
+<p>Before we go any further, it is best if we deleted our old <code class="highlighter-rouge">database</code> because we 
+have not set it up for <code class="highlighter-rouge">migrations</code> so any updates to our <code class="highlighter-rouge">models</code> are going to break <code class="highlighter-rouge">SQL</code> queries to our <code class="highlighter-rouge">db</code> because it is using previously defined <code class="highlighter-rouge">models</code>.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>~&gt; psql postgres
+~&gt; drop raj_db
+~&gt; createdb raj_db
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="time-to-signup">Time to Signup,</h3>
+
+<p>Ok, ok, so we can now define our <code class="highlighter-rouge">signup</code> route.</p>
+
+<p>We will need to import the <code class="highlighter-rouge">database</code> (<code class="highlighter-rouge">db</code>) to check if our new user has already signed up. <br />
+We also need the database to <code class="highlighter-rouge">add</code> them if the are indeed a new user. <br />
+Remeber that we initialized our database in our <code class="highlighter-rouge">models.py</code> <br /></p>
+
+<p><strong><code class="highlighter-rouge">app/auth.py</code></strong></p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">app.models</span> <span class="kn">import</span> <span class="n">User</span><span class="p">,</span> <span class="n">db</span>
+
+<span class="p">...</span>
+
+<span class="n">db</span><span class="p">.</span><span class="n">create_all</span><span class="p">()</span>
+<span class="n">db</span><span class="p">.</span><span class="n">session</span><span class="p">.</span><span class="n">commit</span><span class="p">()</span>
+
+<span class="c1"># Sign Up view
+</span><span class="o">@</span><span class="n">bp</span><span class="p">.</span><span class="n">route</span><span class="p">(</span><span class="s">'/signup'</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">(</span><span class="s">'GET'</span><span class="p">,</span> <span class="s">'POST'</span><span class="p">))</span>
+<span class="k">def</span> <span class="nf">signup</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">request</span><span class="p">.</span><span class="n">method</span> <span class="o">==</span> <span class="s">'POST'</span><span class="p">:</span> 
+        <span class="n">firstname</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="n">form</span><span class="p">[</span><span class="s">'firstname'</span><span class="p">]</span>
+        <span class="n">lastname</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="n">form</span><span class="p">[</span><span class="s">'lastname'</span><span class="p">]</span>
+        <span class="n">user_name</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="n">form</span><span class="p">[</span><span class="s">'username'</span><span class="p">]</span>
+        <span class="n">user_email</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="n">form</span><span class="p">[</span><span class="s">'email'</span><span class="p">]</span>
+        <span class="n">user_password</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="n">form</span><span class="p">[</span><span class="s">'password'</span><span class="p">]</span>
+        
+        <span class="n">error</span> <span class="o">=</span> <span class="bp">None</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">user_name</span> <span class="ow">or</span> <span class="n">firstname</span> <span class="ow">or</span> <span class="n">lastname</span><span class="p">:</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="s">'All names are required.'</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">user_email</span><span class="p">:</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="s">'Email is required.'</span>
+        <span class="k">elif</span> <span class="n">User</span><span class="p">.</span><span class="n">query</span><span class="p">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">email</span><span class="o">=</span><span class="n">user_email</span><span class="p">).</span><span class="n">first</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="s">'The User {} is already registered.'</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">username</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">user_password</span><span class="p">:</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="s">'Password can not be empty!'</span>
+
+        <span class="k">if</span> <span class="n">error</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">new_user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">user_name</span><span class="p">,</span> <span class="n">email</span><span class="o">=</span><span class="n">user_email</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="n">user_password</span><span class="p">)</span>
+            <span class="n">new_user</span><span class="p">.</span><span class="n">firstname</span> <span class="o">=</span> <span class="n">firstname</span>
+            <span class="n">new_user</span><span class="p">.</span><span class="n">lastname</span> <span class="o">=</span> <span class="n">lastname</span>            
+            <span class="n">db</span><span class="p">.</span><span class="n">session</span><span class="p">.</span><span class="n">add</span><span class="p">(</span> <span class="n">new_user</span> <span class="p">)</span>
+            <span class="n">db</span><span class="p">.</span><span class="n">session</span><span class="p">.</span><span class="n">commit</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s">'auth.login'</span><span class="p">))</span>
+        <span class="n">flash</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s">'auth/signup.html'</span><span class="p">)</span>
+
+    <span class="p">...</span> <span class="c1"># other code
+</span>
+</code></pre></div></div>
+
+<p>We obtain user information via the <code class="highlighter-rouge">request.form</code> and check to see if the form has been filled. <br /> Then we check our <code class="highlighter-rouge">db</code> for anyone with the same <code class="highlighter-rouge">email</code> since this is defined as the <code class="highlighter-rouge">primary key</code> in our <code class="highlighter-rouge">User</code> <code class="highlighter-rouge">model</code>. <br /> This ensures that no two users can have the same <code class="highlighter-rouge">email</code> address. <br /></p>
+
+<p>If there are no errors we create a <code class="highlighter-rouge">User</code> and add them to our <code class="highlighter-rouge">db</code> all in one line.  <br />
+The password hasing is handled by the <code class="highlighter-rouge">set_password</code> function of our <code class="highlighter-rouge">User</code> model.  <br /></p>
+
+<p>If everything goes well we redirect the user to the <code class="highlighter-rouge">login</code> page, otherwise we render the 
+<code class="highlighter-rouge">auth/signup.html</code> template. <br /></p>
+
+<p>Wait, where’s the <code class="highlighter-rouge">auth/signup.html</code> template? We haven’t created it yet! Lets do so; <br /></p>
+
+<p><strong><code class="highlighter-rouge">auth/signup.html</code></strong></p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+{% extends 'base.html' %}
+
+{% block header %}
+<span class="nt">&lt;h1</span> <span class="na">class=</span><span class="s">"su-title"</span><span class="nt">&gt;</span>{% block title %}Sign Up{% endblock %}<span class="nt">&lt;/h1&gt;</span>
+{% endblock %}
+
+{% block content %}
+<span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"signup-form"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;form</span> <span class="na">method=</span><span class="s">"post"</span><span class="nt">&gt;</span>
+
+    <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">"firstname"</span><span class="nt">&gt;</span>First Name: <span class="nt">&lt;/label&gt;</span>
+    <span class="nt">&lt;input</span> <span class="na">name=</span><span class="s">"firstname"</span> <span class="na">id=</span><span class="s">"firstname"</span> <span class="na">required</span><span class="nt">&gt;</span>
+
+    <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">"lastname"</span><span class="nt">&gt;</span>Last Name: <span class="nt">&lt;/label&gt;</span>
+    <span class="nt">&lt;input</span> <span class="na">name=</span><span class="s">"lastname"</span> <span class="na">id=</span><span class="s">"lastname"</span> <span class="na">required</span><span class="nt">&gt;</span>
+
+    <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">"email"</span><span class="nt">&gt;</span>Email: <span class="nt">&lt;/label&gt;</span>
+    <span class="nt">&lt;input</span> <span class="na">name=</span><span class="s">"email"</span> <span class="na">id=</span><span class="s">"email"</span> <span class="na">required</span><span class="nt">&gt;</span>
+
+    <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">"username"</span><span class="nt">&gt;</span>Username<span class="nt">&lt;/label&gt;</span>
+    <span class="nt">&lt;input</span> <span class="na">name=</span><span class="s">"username"</span> <span class="na">id=</span><span class="s">"username"</span> <span class="na">required</span><span class="nt">&gt;</span>
+
+    <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">"password"</span><span class="nt">&gt;</span>Password<span class="nt">&lt;/label&gt;</span>
+    <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"password"</span> <span class="na">name=</span><span class="s">"password"</span> <span class="na">id=</span><span class="s">"password"</span> <span class="na">required</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"submit"</span> <span class="na">value=</span><span class="s">"Signup"</span><span class="nt">&gt;</span>
+
+  <span class="nt">&lt;/form&gt;</span>
+<span class="nt">&lt;/div&gt;</span>
+{% endblock %}
+
+</code></pre></div></div>
+
+<p>All the fields have to match what we ask for in the <code class="highlighter-rouge">signup</code> route <code class="highlighter-rouge">app/auth.py</code>. <br /></p>
+
+<hr />
+
+<h2 id="2-log-in">2. Log In</h2>
+
+<p>Ok, so a user has signed up, how or where do they login? We need to define another route for this in our <code class="highlighter-rouge">auth.py</code>;</p>
+
+<p><strong><code class="highlighter-rouge">app/auth.py</code></strong></p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="p">...</span> <span class="c1"># Sign up code
+</span>
+<span class="c1"># Login view
+</span><span class="o">@</span><span class="n">bp</span><span class="p">.</span><span class="n">route</span><span class="p">(</span><span class="s">'/login'</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">(</span><span class="s">'GET'</span><span class="p">,</span> <span class="s">'POST'</span><span class="p">))</span>
+<span class="k">def</span> <span class="nf">login</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">request</span><span class="p">.</span><span class="n">method</span> <span class="o">==</span> <span class="s">'POST'</span><span class="p">:</span>
+        <span class="n">user_name</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="n">form</span><span class="p">[</span><span class="s">'username'</span><span class="p">]</span>
+        <span class="n">user_password</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="n">form</span><span class="p">[</span><span class="s">'password'</span><span class="p">]</span>        
+        
+        <span class="n">error</span> <span class="o">=</span> <span class="bp">None</span>        
+        <span class="n">user_u</span> <span class="o">=</span> <span class="n">User</span><span class="p">.</span><span class="n">query</span><span class="p">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">user_name</span><span class="p">).</span><span class="n">first</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">user_u</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="s">'Username does not exist.'</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">user_u</span><span class="p">.</span><span class="n">check_password</span><span class="p">(</span><span class="n">user_password</span><span class="p">):</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="s">'Incorrect password.'</span>
+
+        <span class="k">if</span> <span class="n">error</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c1"># session.clear()
+</span>            <span class="c1"># session['user_id'] = user['id']
+</span>            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s">'index'</span><span class="p">))</span>
+
+        <span class="n">flash</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s">'auth/login.html'</span><span class="p">)</span>
+
+<span class="o">@</span><span class="n">bp</span><span class="p">.</span><span class="n">route</span><span class="p">(</span><span class="s">'/logout'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">logout</span><span class="p">():</span>
+    <span class="c1"># session.clear()
+</span>    <span class="n">db</span><span class="p">.</span><span class="n">session</span><span class="p">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s">'index'</span><span class="p">))</span>
+
+<span class="o">@</span><span class="n">login_manager</span><span class="p">.</span><span class="n">user_loader</span>
+<span class="k">def</span> <span class="nf">load_user</span><span class="p">(</span><span class="n">email</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">User</span><span class="p">.</span><span class="n">query</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">email</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p>As before, we obtain our information via the <code class="highlighter-rouge">request.form</code>. <br />
+We then make sure that the user actually exists before checking if their password is correct. <br />
+It is important to note that there are two matches being done here; <br /></p>
+
+<ol>
+  <li>Does this user exist.</li>
+  <li>Is their password correct.</li>
+</ol>
+
+<p>If the user exists we then use that user’s <code class="highlighter-rouge">check_password</code> function as defined in our models to authenticate the <code class="highlighter-rouge">plain-text</code> password we’ve obtained. <br /></p>
+
+<p>Now in our case, two users can have the same <code class="highlighter-rouge">username</code> because of the way our <code class="highlighter-rouge">signup</code> works.<br /> 
+This becomes dangerous because if one user gets information that he shares the same username with many other users, he can guess a correct <code class="highlighter-rouge">password</code> and login to an account that does not belong to him.</p>
+
+<p>However, no two users can have the same <code class="highlighter-rouge">email</code> address. So the solution to our problem would be to take in a user’s <code class="highlighter-rouge">email</code> address instead of their <code class="highlighter-rouge">username</code>. <br /></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">...</span> <span class="c1"># other code
+</span>
+<span class="k">def</span> <span class="nf">login</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">request</span><span class="p">.</span><span class="n">method</span> <span class="o">==</span> <span class="s">'POST'</span><span class="p">:</span>
+        <span class="n">user_email</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="n">form</span><span class="p">[</span><span class="s">'email'</span><span class="p">]</span>
+        <span class="n">user_password</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="n">form</span><span class="p">[</span><span class="s">'password'</span><span class="p">]</span>        
+        
+        <span class="n">error</span> <span class="o">=</span> <span class="bp">None</span>        
+        <span class="n">user_u</span> <span class="o">=</span> <span class="n">User</span><span class="p">.</span><span class="n">query</span><span class="p">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">email</span><span class="o">=</span><span class="n">user_email</span><span class="p">).</span><span class="n">first</span><span class="p">()</span>
+
+        <span class="p">...</span> <span class="c1"># other code
+</span>
+</code></pre></div></div>
+
+<p>Now a user either exists or they don’t because all <code class="highlighter-rouge">User</code> emails are unique by definition. <br />
+Well of course if one user happens to know the email addresses of other users he can go to town and start guessing their passwords. (Good luck!)<br /> 
+Let’s get back to the other “good” users. If the login is successful, we redirect the user to the index page. <br />
+If the login is not successful, we <code class="highlighter-rouge">render</code> the <code class="highlighter-rouge">auth/login.html</code> template which does not exist.<br />
+Lets create it.</p>
+
+<p><strong><code class="highlighter-rouge">auth/login.html</code></strong></p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+{% extends 'templates/base.html' %}
+
+{% block header %}
+  <span class="nt">&lt;h1&gt;</span>{% block title %}Log In{% endblock %}<span class="nt">&lt;/h1&gt;</span>
+{% endblock %}
+
+{% block content %}
+  <span class="nt">&lt;form</span> <span class="na">method=</span><span class="s">"post"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">"username"</span><span class="nt">&gt;</span>Username<span class="nt">&lt;/label&gt;</span>
+    <span class="nt">&lt;input</span> <span class="na">name=</span><span class="s">"username"</span> <span class="na">id=</span><span class="s">"username"</span> <span class="na">required</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;label</span> <span class="na">for=</span><span class="s">"password"</span><span class="nt">&gt;</span>Password<span class="nt">&lt;/label&gt;</span>
+    <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"password"</span> <span class="na">name=</span><span class="s">"password"</span> <span class="na">id=</span><span class="s">"password"</span> <span class="na">required</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"submit"</span> <span class="na">value=</span><span class="s">"Log In"</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;/form&gt;</span>
+{% endblock %}
+
+</code></pre></div></div>
+<p><strong><code class="highlighter-rouge">logout</code></strong></p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">@</span><span class="n">bp</span><span class="p">.</span><span class="n">route</span><span class="p">(</span><span class="s">'/logout'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">logout</span><span class="p">():</span>
+    <span class="c1"># session.clear()
+</span>    <span class="n">db</span><span class="p">.</span><span class="n">session</span><span class="p">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s">'index'</span><span class="p">))</span>
+</code></pre></div></div>
+<p>We end the current session and logout a user</p>
+
+<h3 id="the-last-functions-of-appauthpy">The last functions of <code class="highlighter-rouge">app/auth.py</code></h3>
+
+<p><strong><code class="highlighter-rouge">load_user</code></strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">@</span><span class="n">login_manager</span><span class="p">.</span><span class="n">user_loader</span>
+<span class="k">def</span> <span class="nf">load_user</span><span class="p">(</span><span class="n">email</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">User</span><span class="p">.</span><span class="n">query</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">email</span><span class="p">))</span>
+</code></pre></div></div>
+<p>We simply return the user with an email that matches one we have provided but to do this we need a login manager.</p>
+
+<p><strong><code class="highlighter-rouge">app/auth.py</code></strong></p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">from</span> <span class="nn">app</span> <span class="kn">import</span> <span class="n">raj</span>
+<span class="kn">from</span> <span class="nn">app.models</span> <span class="kn">import</span> <span class="n">User</span><span class="p">,</span> <span class="n">db</span>
+<span class="kn">from</span> <span class="nn">flask_login</span> <span class="kn">import</span> <span class="n">LoginManager</span><span class="p">,</span> <span class="n">login_user</span><span class="p">,</span> <span class="n">logout_user</span><span class="p">,</span> <span class="n">current_user</span><span class="p">,</span> <span class="n">login_required</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="p">(</span> <span class="n">Blueprint</span><span class="p">,</span> <span class="n">flash</span><span class="p">,</span> <span class="n">redirect</span><span class="p">,</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">url_for</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span>
+
+<span class="n">bp</span> <span class="o">=</span> <span class="n">Blueprint</span><span class="p">(</span><span class="s">'auth'</span><span class="p">,</span> <span class="n">__name__</span><span class="p">,</span> <span class="n">url_prefix</span><span class="o">=</span><span class="s">'/auth'</span><span class="p">)</span>
+
+<span class="n">login_manager</span> <span class="o">=</span> <span class="n">LoginManager</span><span class="p">()</span>
+<span class="n">login_manager</span><span class="p">.</span><span class="n">init_app</span><span class="p">(</span><span class="n">raj</span><span class="p">)</span>
+
+<span class="n">db</span><span class="p">.</span><span class="n">create_all</span><span class="p">()</span>
+<span class="n">db</span><span class="p">.</span><span class="n">session</span><span class="p">.</span><span class="n">commit</span><span class="p">()</span>
+<span class="p">...</span> <span class="c1"># rest of code
+</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="who-is-a-user-anyway">Who is a User anyway</h2>
+
+<p>If you look at an updated version of our <code class="highlighter-rouge">base.html</code>;</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="nt">&lt;html&gt;</span>
+  <span class="nt">&lt;head&gt;</span>
+    <span class="nt">&lt;meta</span> <span class="na">charset=</span><span class="s">"UTF-8"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">"description"</span> <span class="na">content=</span><span class="s">"Raj's Restaurant"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">"keywords"</span> <span class="na">content=</span><span class="s">"HTML, CSS, JavaScript"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">"author"</span> <span class="na">content=</span><span class="s">"Lehbyte"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">"application-name"</span> <span class="na">content=</span><span class="s">"Raj's Application"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;meta</span> <span class="na">name=</span><span class="s">"viewport"</span> <span class="na">content=</span><span class="s">"width=device-width, initial-scale=1.0"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;title&gt;</span>{{ title }}<span class="nt">&lt;/title&gt;</span>
+    <span class="c">&lt;!-- &lt;link rel="stylesheet" type="text/css" href="./static/css/main.css" /&gt; --&gt;</span>
+    <span class="nt">&lt;link</span>
+      <span class="na">rel=</span><span class="s">"stylesheet"</span>
+      <span class="na">type=</span><span class="s">"text/css"</span>
+      <span class="na">href=</span><span class="s">"{{url_for('static',filename='css/main.css')}}"</span>
+    <span class="nt">/&gt;</span>
+  <span class="nt">&lt;/head&gt;</span>
+  <span class="c">&lt;!-- body --&gt;</span>
+
+  <span class="nt">&lt;body&gt;</span>
+    <span class="nt">&lt;main&gt;</span>
+      <span class="c">&lt;!-- authentication --&gt;</span>
+      <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"auth"</span><span class="nt">&gt;</span>
+        {% if user %}
+        <span class="nt">&lt;p</span> <span class="na">class=</span><span class="s">"loggedin"</span><span class="nt">&gt;</span>{{ user["username"] }}<span class="nt">&lt;/p&gt;</span>
+        <span class="nt">&lt;button&gt;&lt;a</span> <span class="na">href=</span><span class="s">"{{ url_for('auth.logout') }}"</span><span class="nt">&gt;</span>Log Out<span class="nt">&lt;/a&gt;&lt;/button&gt;</span>
+        {% else %}
+        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"Signup"</span><span class="nt">&gt;</span>
+          <span class="nt">&lt;button&gt;&lt;a</span> <span class="na">href=</span><span class="s">"{{ url_for('auth.signup') }}"</span><span class="nt">&gt;</span>SignUp<span class="nt">&lt;/a&gt;&lt;/button&gt;</span>
+        <span class="nt">&lt;/div&gt;</span>
+        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"login"</span><span class="nt">&gt;</span>
+          <span class="nt">&lt;form</span> <span class="na">method=</span><span class="s">"post"</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;input</span>
+              <span class="na">class=</span><span class="s">"user"</span>
+              <span class="na">type=</span><span class="s">"text"</span>
+              <span class="na">id=</span><span class="s">"user"</span>
+              <span class="na">placeholder=</span><span class="s">"Username"</span>
+              <span class="na">required</span>
+            <span class="nt">/&gt;</span>
+            <span class="nt">&lt;input</span>
+              <span class="na">class=</span><span class="s">"password"</span>
+              <span class="na">type=</span><span class="s">"password"</span>
+              <span class="na">id=</span><span class="s">"password"</span>
+              <span class="na">placeholder=</span><span class="s">"Password"</span>
+              <span class="na">required</span>
+            <span class="nt">/&gt;</span>
+            <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">"submit"</span> <span class="na">value=</span><span class="s">"Log In"</span> <span class="nt">/&gt;</span>
+          <span class="nt">&lt;/form&gt;</span>
+        <span class="nt">&lt;/div&gt;</span>
+        {% endif %}
+      <span class="nt">&lt;/div&gt;</span>
+
+      <span class="c">&lt;!-- Main content --&gt;</span>
+
+      <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"container"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;header&gt;</span>
+          {% block header %}{% endblock %}
+        <span class="nt">&lt;/header&gt;</span>
+
+        {% for message in get_flashed_messages() %}
+        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"flash"</span><span class="nt">&gt;</span>{{ message }}<span class="nt">&lt;/div&gt;</span>
+        {% endfor %} {% block content %}{% endblock %}
+      <span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;/main&gt;</span>
+  <span class="nt">&lt;/body&gt;</span>
+  <span class="c">&lt;!--body --&gt;</span>
+  <span class="c">&lt;!-- footer --&gt;</span>
+  <span class="nt">&lt;footer&gt;</span>
+    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"footer-wrap"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"footer-left"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;h3&gt;</span>Left section<span class="nt">&lt;/h3&gt;</span>
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+        tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
+        veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+        commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
+        velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint
+        occaecat cupidatat non proident, sunt in culpa qui officia deserunt
+        mollit anim id est laborum."
+      <span class="nt">&lt;/div&gt;</span>
+      <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"footer-middle"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;h3&gt;</span>Middle section<span class="nt">&lt;/h3&gt;</span>
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+        tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
+        veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+        commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
+        velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint
+        occaecat cupidatat non proident, sunt in culpa qui officia deserunt
+        mollit anim id est laborum."
+      <span class="nt">&lt;/div&gt;</span>
+      <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"footer-right"</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;h3&gt;</span>Right Section<span class="nt">&lt;/h3&gt;</span>
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+        tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
+        veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+        commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
+        velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint
+        occaecat cupidatat non proident, sunt in culpa qui officia deserunt
+        mollit anim id est laborum."
+      <span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;/div&gt;</span>
+    <span class="nt">&lt;p&gt;</span>Copyright Raj's Restaurant <span class="ni">&amp;copy;</span> 2019<span class="nt">&lt;/p&gt;</span>
+  <span class="nt">&lt;/footer&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+
+
+</code></pre></div></div>
+<p>Specifically under authentication; <br />
+You will see that we check to see if a <code class="highlighter-rouge">user</code> exists in our <code class="highlighter-rouge">app</code>’s context and then 
+render different <code class="highlighter-rouge">html</code> code based on that.  <br /></p>
+
+<p>Where does this user get passed to our base template? Lets take a look at our updated <code class="highlighter-rouge">views.py</code></p>
+
+<p><strong><code class="highlighter-rouge">app/views.py</code></strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">request</span><span class="p">,</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">redirect</span><span class="p">,</span> <span class="n">url_for</span><span class="p">,</span> <span class="n">g</span>
+<span class="kn">from</span> <span class="nn">auth</span> <span class="kn">import</span> <span class="n">login_manager</span><span class="p">,</span> <span class="n">current_user</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
+<span class="kn">from</span> <span class="nn">flask_scss</span> <span class="kn">import</span> <span class="n">Scss</span>
+<span class="kn">from</span> <span class="nn">app</span> <span class="kn">import</span> <span class="n">raj</span>
+
+<span class="n">app_name</span> <span class="o">=</span> <span class="s">"Raj's Restaurant App"</span>
+<span class="n">Scss</span><span class="p">(</span><span class="n">raj</span><span class="p">,</span> <span class="n">asset_dir</span><span class="o">=</span><span class="s">'app/assets/scss'</span><span class="p">,</span> <span class="n">static_dir</span><span class="o">=</span><span class="s">'app/static/css'</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">templated</span><span class="p">(</span><span class="n">template</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+        <span class="o">@</span><span class="n">wraps</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">decorated_function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">template_name</span> <span class="o">=</span> <span class="n">template</span>
+            <span class="k">if</span> <span class="n">template_name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">template_name</span> <span class="o">=</span> <span class="n">request</span><span class="p">.</span><span class="n">endpoint</span><span class="p">.</span><span class="n">replace</span><span class="p">(</span><span class="s">'.'</span><span class="p">,</span><span class="s">'/'</span><span class="p">)</span> <span class="o">+</span> <span class="s">'.html'</span>
+            <span class="n">ctx</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ctx</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">ctx</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">ctx</span>
+            <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="n">template_name</span><span class="p">,</span> <span class="o">**</span><span class="n">ctx</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">decorated_function</span>
+    <span class="k">return</span> <span class="n">decorator</span>
+
+<span class="o">@</span><span class="n">raj</span><span class="p">.</span><span class="n">before_request</span>
+<span class="k">def</span> <span class="nf">before_request</span><span class="p">():</span>
+    <span class="n">g</span><span class="p">.</span><span class="n">user</span> <span class="o">=</span> <span class="n">current_user</span>
+
+<span class="o">@</span><span class="n">raj</span><span class="p">.</span><span class="n">route</span><span class="p">(</span><span class="s">'/'</span><span class="p">)</span>
+<span class="o">@</span><span class="n">raj</span><span class="p">.</span><span class="n">route</span><span class="p">(</span><span class="s">'/home'</span><span class="p">)</span>
+<span class="o">@</span><span class="n">raj</span><span class="p">.</span><span class="n">route</span><span class="p">(</span><span class="s">'/index'</span><span class="p">)</span>
+<span class="o">@</span><span class="n">templated</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">home</span><span class="p">():</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">g</span><span class="p">.</span><span class="n">user</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">app_name</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">)</span>
+
+<span class="o">@</span><span class="n">raj</span><span class="p">.</span><span class="n">route</span><span class="p">(</span><span class="s">'/about'</span><span class="p">)</span>
+<span class="o">@</span><span class="n">templated</span><span class="p">(</span><span class="s">'about.html'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">about</span><span class="p">():</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">app_name</span><span class="p">)</span>
+
+<span class="o">@</span><span class="n">raj</span><span class="p">.</span><span class="n">route</span><span class="p">(</span><span class="s">'/coupons'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">coupons</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s">'coupons.html'</span><span class="p">,</span><span class="n">title</span><span class="o">=</span><span class="n">app_name</span><span class="p">)</span>
+
+<span class="o">@</span><span class="n">raj</span><span class="p">.</span><span class="n">route</span><span class="p">(</span><span class="s">'/blog'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">blog</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s">'blog/index.html'</span><span class="p">,</span><span class="n">title</span><span class="o">=</span><span class="n">app_name</span><span class="p">)</span>
+
+<span class="o">@</span><span class="n">raj</span><span class="p">.</span><span class="n">route</span><span class="p">(</span><span class="s">'/support'</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s">'GET'</span><span class="p">,</span><span class="s">'POST'</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">support</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s">'support.html'</span><span class="p">,</span><span class="n">title</span><span class="o">=</span><span class="n">app_name</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="whoah">Whoah!</h2>
+
+<p>On line <code class="highlighter-rouge">2</code> we import a <code class="highlighter-rouge">login_manager</code> and <code class="highlighter-rouge">current_user</code> from <code class="highlighter-rouge">auth</code>. <br />
+Then make sure that <code class="highlighter-rouge">g.user</code> is the <code class="highlighter-rouge">current_user</code> before any request.</p>
+
+<p>We will work out the details in the next tutorial but for now all you need to know is that a guest is also a user within the app’s context.</p>
+
+<h3 id="templated---ed">templated - ed</h3>
+<p>This was just fancy code for simplifying template rendering, nothig too special.</p>
+
+<hr />
+
+<h2 id="front-matter">Front matter</h2>
+<p>You may have noticed a change in the way we load static files</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+    <span class="nt">&lt;link</span> <span class="na">href=</span><span class="s">"{{url_for('static',filename='css/main.css')}}"</span><span class="nt">/&gt;</span>
+
+</code></pre></div></div>
+
+<p>Is better because it simplifies <code class="highlighter-rouge">css</code> loading for <code class="highlighter-rouge">Blueprints</code>. <br />
+If we tried to use the old method of loading our static files; <br /></p>
+
+<p><code class="highlighter-rouge">&lt;link rel="stylesheet" type="text/css" href="./static/css/main.css" /&gt;</code></p>
+
+<p>We would almost endup with a <code class="highlighter-rouge">404</code> resource not found error for the case of <code class="highlighter-rouge">auth/signup.html</code> and <code class="highlighter-rouge">auth/login.html</code>. <br /> <strong>Why?</strong> Because our <code class="highlighter-rouge">auth</code> <code class="highlighter-rouge">Blueprint</code> prefixes every <code class="highlighter-rouge">URL</code> with <code class="highlighter-rouge">/auth</code><br /> so a request for <code class="highlighter-rouge">/static/css/main.css</code> would become <code class="highlighter-rouge">/auth/static/css/main.css</code> which does not exist. <br /></p>
+
+<h3 id="fancy-foot-work">Fancy Foot Work!</h3>
+
+<p>We have also added a footer on our frontend. 
+<strong><code class="highlighter-rouge">assets/scss/_footer.scss</code></strong></p>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">footer</span><span class="p">{</span>    
+    <span class="nl">font-family</span><span class="p">:</span> <span class="s2">'Segoe UI'</span><span class="p">,</span> <span class="n">Tahoma</span><span class="p">,</span> <span class="n">Geneva</span><span class="p">,</span> <span class="n">Verdana</span><span class="p">,</span> <span class="nb">sans-serif</span><span class="p">;</span>
+    <span class="nl">font-weight</span><span class="p">:</span> <span class="nb">normal</span><span class="p">;</span>
+    <span class="nl">font-size</span><span class="p">:</span> <span class="m">16px</span><span class="p">;</span>
+    <span class="nl">color</span><span class="p">:</span> <span class="no">burlywood</span><span class="p">;</span><span class="err">//</span> <span class="err">#e0b172;</span>
+    <span class="nl">background-color</span><span class="p">:</span> <span class="no">black</span><span class="p">;</span>
+    <span class="nl">position</span><span class="p">:</span> <span class="nb">relative</span><span class="p">;</span>     
+<span class="p">}</span>
+<span class="nc">.footer-wrap</span><span class="p">{</span>   
+    <span class="nl">display</span><span class="p">:</span> <span class="n">flex</span><span class="p">;</span>
+    <span class="nl">flex-direction</span><span class="p">:</span> <span class="n">row</span><span class="p">;</span>
+    <span class="nl">padding</span><span class="p">:</span> <span class="m">20px</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.footer-left</span><span class="o">,</span>
+<span class="nc">.footer-middle</span><span class="o">,</span>
+<span class="nc">.footer-right</span><span class="p">{</span>
+    <span class="nl">padding</span><span class="p">:</span> <span class="m">10px</span><span class="p">;</span>    
+<span class="p">}</span>
+<span class="nt">footer</span> <span class="nt">h3</span><span class="o">,</span>
+<span class="nt">footer</span> <span class="nt">p</span><span class="p">{</span>    
+    <span class="nl">color</span><span class="p">:</span> <span class="no">snow</span><span class="p">;</span>
+    <span class="nl">padding</span><span class="p">:</span> <span class="m">10px</span><span class="p">;</span>
+    <span class="nl">text-align</span><span class="p">:</span> <span class="nb">center</span><span class="p">;</span>    
+<span class="p">}</span>
+<span class="nt">footer</span> <span class="nt">p</span><span class="p">{</span>
+    <span class="nl">padding</span><span class="p">:</span> <span class="m">10px</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="k">@supports</span> <span class="p">(</span><span class="n">display</span><span class="p">:</span> <span class="n">flex</span><span class="p">){</span>
+    <span class="k">@media</span> <span class="n">screen</span> <span class="n">and</span> <span class="p">(</span><span class="n">max-width</span><span class="p">:</span> <span class="m">516px</span><span class="p">){</span>
+        <span class="nc">.footer-wrap</span><span class="p">{</span>
+            <span class="nl">flex-direction</span><span class="p">:</span> <span class="n">column</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+</code></pre></div></div>
+<p>Do not forget to <code class="highlighter-rouge">@import 'footer';</code> at the bottom of your <code class="highlighter-rouge">assets/scss/main.scss</code> file.</p>
+
+<p>Let’s also make our <code class="highlighter-rouge">grid</code> layout work on smaller screens;</p>
+
+<p><strong><code class="highlighter-rouge">assets/scss/_menugrid.scss</code></strong></p>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="o">...</span> <span class="c">/* previous code */</span>
+
+<span class="k">@media</span> <span class="n">screen</span> <span class="n">and</span> <span class="p">(</span><span class="n">max-width</span><span class="p">:</span> <span class="m">516px</span><span class="p">){</span>
+    <span class="nc">.food-grid</span><span class="p">{</span>                        
+        <span class="py">grid-template-columns</span><span class="p">:</span> <span class="m">100%</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="nc">.food-item</span><span class="p">{</span>        
+        <span class="nl">background-color</span><span class="p">:</span> <span class="no">seashell</span><span class="p">;</span>        
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>You can view other style changes in this project’s repo.</p>
+
+<h2 id="part-4">Part 4</h2>
+
+<p>Next time, we will be looking at;</p>
+
+<ol>
+  <li>Defining checkout process</li>
+  <li>How to add images to our app</li>
+  <li>Creating a <code class="highlighter-rouge">blog</code> <code class="highlighter-rouge">Blueprint</code></li>
+</ol>
+
+<p>Happy coding. 🙂</p>
+:ET

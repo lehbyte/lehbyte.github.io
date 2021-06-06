@@ -1,0 +1,39 @@
+I":<!-- Portfolio Grid Section -->
+
+<div class="portfolio-grid">
+    
+    <div class="portfolio-cell">
+        <a href="/portfolio/project3" class="portfolio-link" data-keyboard="true">
+            <div class="caption" title="Raj">
+                <div class="caption-content">
+                    <i class="fa fa-search-plus fa-3x"></i>
+                </div>
+            </div>
+            <img src="/assets/img/portfolio/shawnanggg.jpg" class="" alt="" />
+        </a>
+    </div>
+    
+    <div class="portfolio-cell">
+        <a href="/portfolio/project2" class="portfolio-link" data-keyboard="true">
+            <div class="caption" title="Typeonstrap">
+                <div class="caption-content">
+                    <i class="fa fa-search-plus fa-3x"></i>
+                </div>
+            </div>
+            <img src="/assets/img/portfolio/typeonstrap.png" class="" alt="" />
+        </a>
+    </div>
+    
+    <div class="portfolio-cell">
+        <a href="/portfolio/project1" class="portfolio-link" data-keyboard="true">
+            <div class="caption" title="Pydotenv">
+                <div class="caption-content">
+                    <i class="fa fa-search-plus fa-3x"></i>
+                </div>
+            </div>
+            <img src="/assets/img/portfolio/python.jpg" class="" alt="" />
+        </a>
+    </div>
+    
+</div>
+:ET

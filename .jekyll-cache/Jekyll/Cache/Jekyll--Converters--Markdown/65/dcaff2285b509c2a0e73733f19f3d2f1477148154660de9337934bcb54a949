@@ -1,0 +1,12 @@
+I"~<p>If you go to <a href="https://gulpjs.com">gulpjs.com</a> you will be greeted with the following banner;</p>
+<blockquote>
+  <p>Automate and enhance your workflow</p>
+</blockquote>
+
+<p>I would like to add just one word in that banner; <code class="highlighter-rouge">frontend</code> because that is what it does best.</p>
+
+<p>More concisely, gulp is a frontend build system;</p>
+<blockquote>
+  <p>It is a task runner built on Nodejs and npm used for automation of time-consuming and repetitiev tasks involved in web development line minification, concatenation , cache busting, unit testing, linting, optiization, etc.</p>
+</blockquote>
+:ET

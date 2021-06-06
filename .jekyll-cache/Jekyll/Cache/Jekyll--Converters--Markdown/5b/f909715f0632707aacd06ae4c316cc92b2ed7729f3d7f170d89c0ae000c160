@@ -1,0 +1,9 @@
+I"å<h2 id="pydotenv">Pydotenv</h2>
+
+<p>Pydotenv is a great package that allows you to keep you app safe by or hiding your app secrets such as passwordwords, database names.</p>
+
+<h2 id="flaws">Flaws</h2>
+<p>It, however, has a problem where passwords containing the octothorpe are improperly parsed.</p>
+
+<p>I added my fix but thought it would  be a good idea to try and find other areas where improvements might be made so I forked it and having been working on it for some time now.</p>
+:ET

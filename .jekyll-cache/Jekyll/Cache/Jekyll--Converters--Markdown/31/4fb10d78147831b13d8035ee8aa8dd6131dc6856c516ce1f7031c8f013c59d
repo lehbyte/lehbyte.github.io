@@ -1,0 +1,22 @@
+I"§<p>Suppose you want to install an npm package globally  as in npm install -g git-pending but for whatever reason encounter a permissions problem, EACCESS for example. One of the things you could do to fix that is by running the npm command with sudo privileges, as in; <code class="highlighter-rouge">sudo npm install -g git-pending.</code></p>
+
+<p>However if you do this often enough, it becomes a cumbersome and tedious.
+You should not have to type in your password every time you want to install an npm package.</p>
+
+<p>Now you can modify your permissions and terminal settings to alleviate the pressure of having to type in your password everyone and then but the problem will persist.</p>
+
+<p>A better solution is to to create a global folder for your packages in your home directory such as <code class="highlighter-rouge">home/user/.npm-global/</code> then tell npm about it by setting <code class="highlighter-rouge">NPM_CONFIG_PREFIX=~/.npm-global</code> or just doing <code class="highlighter-rouge">npm config set prefix '~/.npm-global'.</code></p>
+
+<p>Lastly you would need to export the bin folder. This would usually be done in your <code class="highlighter-rouge">.bashrc</code> file or you could append the command in your .profile, source it and relaunch the terminal.</p>
+
+<p>However, if you use zsh like so many of us then you would edit your <code class="highlighter-rouge">.zshrc</code> instead. Here is an example;</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">NPM_CONFIG_PREFIX</span><span class="o">=</span>~/.npm-global
+<span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span>~/.npm-global/bin<span class="p">;</span><span class="nv">$PATH</span>
+<span class="c"># export PATH=~/.config/composer/vendor/bin:$PATH</span>
+</code></pre></div></div>
+
+<p>The last line is commented out because it is not necessary.</p>
+
+<p>After that, you would source <code class="highlighter-rouge">~/.zshrc</code>, close the terminal and launch it again. Then you can try to install whatever package you had wanted to originally install; <code class="highlighter-rouge">npm install -g git-pending.</code></p>
+:ET

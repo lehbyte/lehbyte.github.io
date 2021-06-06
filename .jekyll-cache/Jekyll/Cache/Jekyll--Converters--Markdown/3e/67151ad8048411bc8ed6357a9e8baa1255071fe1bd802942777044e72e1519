@@ -1,0 +1,8 @@
+I"C<h2 id="goals">Goals;</h2>
+<ol>
+  <li>Add some <code class="highlighter-rouge">CSS</code> using the <code class="highlighter-rouge">flask-scss</code> extension.</li>
+  <li>Add <code class="highlighter-rouge">HTML</code> templates</li>
+  <li>Learn how to create and connect a <code class="highlighter-rouge">database</code> to our <code class="highlighter-rouge">flask</code> application.</li>
+  <li>Add <code class="highlighter-rouge">users</code>to our <code class="highlighter-rouge">database</code> and <code class="highlighter-rouge">admin</code> views to the app</li>
+</ol>
+:ET
